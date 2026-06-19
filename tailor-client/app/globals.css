@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* minimal reset + container */
+html,body,#root {
+  height: 100%;
+}
+:root {
+  --brand: #0ea5a4; /* teal-ish */
+}
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.input-box {
+  @apply w-full px-3 py-2 border rounded-lg bg-gray-50 outline-none focus:ring-2 focus:ring-emerald-500;
+}
+
+@media print {
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+
+@font-face {
+  font-family: "PlayfairDisplay";
+  src: url("/fonts/PlayfairDisplay.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Medium.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+.font-PlayfairDisplay {
+  font-family: "PlayfairDisplay", serif;
+}
+
+.font-Poppins {
+  font-family: "Poppins", serif;
+}
