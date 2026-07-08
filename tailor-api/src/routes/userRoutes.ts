@@ -5,7 +5,7 @@ import { requireBoutique } from "../middleware/boutiqueMiddleware";
 
 const router = express.Router()
 
-// router.get("/get-user", authMiddleware, requireBoutique, getUser);
+router.get("/get-user", authMiddleware, requireBoutique, getUser);
 
 router.put("/profile", authMiddleware, updateProfile);
 
