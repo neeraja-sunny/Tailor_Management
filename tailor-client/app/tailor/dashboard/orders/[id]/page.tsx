@@ -87,7 +87,6 @@ export default function OrderDetails() {
 
   const handleReceivePayment = async () => {
     if (!order || !amountReceived || Number(amountReceived) <= 0) return;
-    if (!window.confirm(`Record a payment of ${money(Number(amountReceived))}? This changes the customer balance.`)) return;
     setSaving(true);
     try {
       await api.patch(`/api/orders/${order._id}/receive-payment`, { amount: Number(amountReceived) });
@@ -100,7 +99,6 @@ export default function OrderDetails() {
 
   const handleAddExtraCharge = async () => {
     if (!order || !extraReason.trim() || !extraAmount || Number(extraAmount) <= 0) return;
-    if (!window.confirm(`Add ${money(Number(extraAmount))} for "${extraReason.trim()}"?`)) return;
     setSaving(true);
     try {
       await api.patch(`/api/orders/${order._id}/add-extra-charge`, {
@@ -122,7 +120,6 @@ export default function OrderDetails() {
       setActionError(discountType === "percentage" ? "Enter a percentage from 0 to 100." : "Enter a valid offer amount.");
       return;
     }
-    if (!window.confirm(remove ? "Remove the current offer from this order?" : "Apply this offer and recalculate the order total?")) return;
     setSaving(true);
     setActionError("");
     try {
@@ -138,7 +135,6 @@ export default function OrderDetails() {
 
   const handleMarkDelivered = async () => {
     if (!order) return;
-    if (!window.confirm("Mark this order as delivered? This records the delivery date as today.")) return;
     setSaving(true);
     setActionError("");
     try {
@@ -181,10 +177,8 @@ export default function OrderDetails() {
     doc.setFontSize(18);
     doc.text("TailorPro", left, 25);
     doc.setTextColor(31, 41, 55);
-    doc.setFont("helvetica", "normal");
     doc.setFontSize(22);
     textRight("INVOICE", 24);
-    doc.setFont(pdfFont, "bold");
     doc.setFontSize(10);
     textRight(`#${order.orderNumber}`, 31);
     doc.setFont(pdfFont, "normal");
@@ -243,7 +237,7 @@ export default function OrderDetails() {
         ? `Delivered: ${date(order.deliveredAt || item.deliveryDate)}`
         : `Expected delivery: ${date(item.deliveryDate)}`;
       doc.setFont(pdfFont, "bold");
-      doc.setFontSize(12);
+      doc.setFontSize(10);
       doc.setTextColor(17, 24, 39);
       doc.text(item.name || "Tailoring service", left + 2, y);
       doc.setFont(pdfFont, "normal");
@@ -279,7 +273,6 @@ export default function OrderDetails() {
     ];
     summary.forEach(([label, value], index) => {
       const isTotal = label === "Final total" || label === "Balance due";
-      const isFinalTotal = label === "Final total";
       const rowY = y + index * 8;
       if (label === "Final total") {
         doc.setDrawColor(209, 213, 219);
@@ -291,12 +284,8 @@ export default function OrderDetails() {
         doc.rect(90, rowY - 5.8, right - 90, 10, "F");
       }
       doc.setFont(pdfFont, isTotal ? "bold" : "normal");
-      doc.setFontSize(isFinalTotal ? 14 : isTotal ? 12 : 10);
-      if (isFinalTotal) {
-        doc.setTextColor(0, 0, 0);
-      } else {
-        doc.setTextColor(label === "Balance due" ? 6 : 75, label === "Balance due" ? 95 : 85, label === "Balance due" ? 70 : 99);
-      }
+      doc.setFontSize(isTotal ? 12 : 10);
+      doc.setTextColor(label === "Balance due" ? 6 : 75, label === "Balance due" ? 95 : 85, label === "Balance due" ? 70 : 99);
       doc.text(label, 93, rowY);
       doc.text(value, right - 3, rowY, { align: "right" });
     });
@@ -308,7 +297,7 @@ export default function OrderDetails() {
     doc.setFont(pdfFont, "bold");
     doc.setFontSize(9);
     doc.setTextColor(55, 65, 81);
-    doc.text("CRAFTED WITH CARE. MADE FOR YOU.", 105, footerY - 1, { align: "center" });
+    doc.text("CRAFTED WITH CARE. MADE FOR YOU.", 110, footerY - 1, { align: "center" });
     doc.setFont(pdfFont, "normal");
     doc.setFontSize(9);
     doc.setTextColor(107, 114, 128);
@@ -445,7 +434,7 @@ export default function OrderDetails() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Invoice details</p>
             <h1 className="mt-1 text-2xl font-bold text-gray-900">Order #{order.orderNumber}</h1>
-            <p className="mt-1 text-sm text-gray-500">Ordered on {date(order.createdAt)}</p>
+            <p className="mt-1 text-sm text-gray-500">Ordered {date(order.createdAt)}</p>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <span className={`w-fit px-3 py-1.5 text-xs font-bold uppercase ${order.status === "delivered" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"}`}>
