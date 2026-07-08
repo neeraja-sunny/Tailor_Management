@@ -34,6 +34,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "https://tailor-pro-umber.vercel.app",
+      "https://tailor-management-orcin.vercel.app/",
       // "https://tailor-axz18k1m6-aleeshamufthis-projects.vercel.app",
       /https:\/\/tailor-.*\.vercel\.app$/
     ],
