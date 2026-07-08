@@ -33,8 +33,10 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "http://localhost:3001",
       "https://tailor-pro-umber.vercel.app",
-      "https://tailor-management-orcin.vercel.app/",
+      "https://tailor-management-orcin.vercel.app",
       // "https://tailor-axz18k1m6-aleeshamufthis-projects.vercel.app",
       /https:\/\/tailor-.*\.vercel\.app$/
     ],
@@ -50,6 +52,7 @@ app.use(requestLogger);
 app.get('/', (_req, res) => res.json({ ok: true, message: 'Tailor API up' }))
 
 app.get('/api/test/testing', (_req, res) => res.json({ ok: true, message: 'Tailor API for testing up' }))
+app.get('/api/health', (_req, res) => res.json({ ok: true, environment: process.env.NODE_ENV || 'development' }))
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);

@@ -16,13 +16,8 @@ export const authMiddleware = async ( req: Request, res: Response, next: NextFun
       decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!);
     }
 
-    if (!decoded && req.cookies?.refreshToken) {
-      token = req.cookies.refreshToken;
-      decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!);
-    }
-
     if (!decoded) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Unauthorized: Bearer access token required" });
     }
 
     const user = await User.findById(decoded.userId).select(
