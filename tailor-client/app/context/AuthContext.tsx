@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import api from '@/lib/axios'
-import axios from 'axios'
+import { setAccessToken } from '@/lib/axios'
 
 type User = {
   id: string
@@ -44,10 +44,13 @@ useEffect(() => {
       setUser(res.data.user);
     } catch (err: any) {
       setUser(null);
-      if (err.response?.status === 401) {
-      alert("Your account has been deactivated. Please contact the owner.");
-      window.location.href = "/auth";
-    }
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setAccessToken(null);
+      }
+      if (err.response?.status === 403 && err.response?.data?.message === "Account disabled") {
+        alert("Your account has been deactivated. Please contact the owner.");
+        window.location.href = "/auth";
+      }
     } finally {
       setLoading(false);
     }
@@ -56,12 +59,15 @@ useEffect(() => {
 }, []);
 
 const logout = async () => {
+    setAccessToken(null)
+    setUser(null)
     try {
       await api.post("/api/auth/logout", {}, { withCredentials: true })
     } catch (err) {
       console.error("Logout API failed", err)
     } finally {
-      setUser(null)  
+      setAccessToken(null)
+      setUser(null)
     }
   }
 

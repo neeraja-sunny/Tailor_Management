@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "@/lib/axios";
+import api, { setAccessToken } from "@/lib/axios";
 import { useAuth } from "@/app/context/AuthContext";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Trash2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { user, setUser } = useAuth();
 
   const [form, setForm] = useState({
@@ -22,6 +24,11 @@ export default function ProfilePage() {
   const [boutiques, setBoutiques] = useState<any[]>([]);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
 
   useEffect(() => {
@@ -33,27 +40,20 @@ export default function ProfilePage() {
       });
     }
   }, [user]);
-  console.log({user}, 'user')
-  console.log(user?.userPhoto, 'user.userphoto')
-
   useEffect(() => {
+      if (user?.role !== "owner") return;
       api.get("/api/boutique/my-boutiques").then(res => {
         setBoutiques(res.data);
-      });
-    }, []);
+      }).catch(() => setBoutiques([]));
+    }, [user?.role]);
 
     const profileImage = preview || user?.userPhoto || "/default.png";
-
-
-  console.log(profileImage, 'profile image')
 
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
       let photoUrl = form.userPhoto;
-
-      console.log('photo url', photoUrl)
 
       if (photoFile) {
         photoUrl = await uploadToCloudinary(photoFile);
@@ -65,8 +65,6 @@ export default function ProfilePage() {
         userPhoto: photoUrl,
       });
 
-      const profile = res.data.user.userPhoto
-      console.log("Profile update response:", res);
       setUser(res.data.user);
       setForm({
         fullName: res.data.user.fullName,
@@ -80,6 +78,26 @@ export default function ProfilePage() {
       alert("Profile update failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    setDeleteError("");
+    try {
+      await api.delete("/api/user/account", {
+        data: {
+          password: deletePassword,
+          confirmation: deleteConfirmation,
+        },
+      });
+      setAccessToken(null);
+      setUser(null);
+      router.replace("/auth");
+    } catch (error: any) {
+      setDeleteError(error.response?.data?.message || "Unable to delete account");
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -230,6 +248,48 @@ return (
 
     </div>
   </div>
+
+  <section className="border border-red-200 bg-white p-6">
+    <h2 className="text-lg font-bold text-gray-900">Delete Account</h2>
+    <p className="mt-2 text-sm text-gray-600">
+      Disables your login and staff access. Boutique, order, customer, and payment records are retained.
+    </p>
+    <button
+      type="button"
+      onClick={() => setDeleteOpen(true)}
+      className="mt-5 flex items-center gap-2 border border-red-600 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
+    >
+      <Trash2 size={17} />
+      Delete Account
+    </button>
+  </section>
+
+  {deleteOpen && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="w-full max-w-md bg-white p-6 shadow-lg">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">Confirm Account Deletion</h2>
+          <button type="button" onClick={() => setDeleteOpen(false)} aria-label="Close account deletion" title="Close"><X /></button>
+        </div>
+        <p className="mt-3 text-sm text-gray-600">Enter your password and type <strong>{user?.email}</strong> to confirm.</p>
+        <label className="mt-5 block text-sm font-medium text-gray-700">
+          Password
+          <input type="password" value={deletePassword} onChange={(event) => setDeletePassword(event.target.value)} className="mt-1.5 h-11 w-full border border-gray-300 px-3 outline-none focus:border-red-500" />
+        </label>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Confirm email
+          <input type="email" value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} className="mt-1.5 h-11 w-full border border-gray-300 px-3 outline-none focus:border-red-500" />
+        </label>
+        {deleteError && <p role="alert" className="mt-4 border border-red-200 bg-red-50 p-3 text-sm text-red-700">{deleteError}</p>}
+        <div className="mt-6 flex justify-end gap-3">
+          <button type="button" onClick={() => setDeleteOpen(false)} className="border border-gray-300 px-4 py-2 text-sm font-semibold">Keep Account</button>
+          <button type="button" onClick={handleDeleteAccount} disabled={deletingAccount || !deletePassword || deleteConfirmation.toLowerCase() !== user?.email?.toLowerCase()} className="bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">
+            {deletingAccount ? "Deleting..." : "Delete Account"}
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 
 </div>
 

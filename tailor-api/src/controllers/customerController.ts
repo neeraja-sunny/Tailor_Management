@@ -23,15 +23,22 @@ export const createCustomer = async (req: Request, res: Response) => {
 export const getCustomers = async (req: Request, res: Response) => {
   try {
     const boutiqueId = (req as any).boutiqueId;
-    console.log("Boutique ID in getCustomers:", boutiqueId);
     if (!boutiqueId) {
       return res.status(400).json({ message: "Active boutique not found" });
     }
-    const customers = await Customer.find({ 
-      boutique: boutiqueId 
-    }).sort({ createdAt: -1 });
-    console.log("Fetched customers:", customers);
-    res.json(customers);
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const filter = { boutique: boutiqueId };
+    const total = await Customer.countDocuments(filter);
+
+    const customers = await Customer.find(filter)
+      .select("name phone city state createdAt")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    res.json({ customers, meta: { page, limit, total } });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch customers" });
   }

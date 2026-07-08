@@ -66,6 +66,16 @@ const DEFAULT_MEASUREMENT_CONFIG = {
     image: "/measurements/knee_circumference.jpg",
     position: { top: "60%", left: "55%" },
   },
+  fullLength: {
+    label: "Full Length",
+    image: "/measurements/full_length.png",
+    position: { top: "72%", left: "20%" },
+  },
+  topLength: {
+    label: "Top Length",
+    image: "/measurements/top_length_cropped.png",
+    position: { top: "48%", left: "20%" },
+  },
   bottomlength: {
     label: "Bottom Length",
     image: "/measurements/Bottomlength.jpg",
@@ -76,6 +86,33 @@ const DEFAULT_MEASUREMENT_CONFIG = {
     image: "/measurements/ankle.jpg",
     position: { top: "87%", left: "60%" },
   },
+  bust: { label: "Bust", image: "/measurements/chest.jpg", position: { top: "22%", left: "55%" } },
+  underBust: { label: "Under Bust", image: "/measurements/chest.jpg", position: { top: "27%", left: "55%" } },
+  thigh: { label: "Thigh", image: "/measurements/hip_circumference.jpg", position: { top: "49%", left: "55%" } },
+  calf: { label: "Calf", image: "/measurements/knee_circumference.jpg", position: { top: "69%", left: "55%" } },
+  crotchDepth: { label: "Crotch Depth", image: "/measurements/measure.jpg", position: { top: "44%", left: "30%" } },
+  inseam: { label: "Inseam", image: "/measurements/Bottomlength.jpg", position: { top: "65%", left: "30%" } },
+  frontNeckDepth: { label: "Front Neck Depth", image: "/measurements/neck.jpg", position: { top: "13%", left: "55%" } },
+  backNeckDepth: { label: "Back Neck Depth", image: "/measurements/neck.jpg", position: { top: "13%", left: "30%" } },
+  flare: { label: "Flare", image: "/measurements/Bottomlength.jpg", position: { top: "84%", left: "45%" } },
+};
+
+type MeasurementKey = keyof typeof DEFAULT_MEASUREMENT_CONFIG;
+
+const MEASUREMENT_TEMPLATES: Record<string, MeasurementKey[]> = {
+  shirt: ["shoulder", "chest", "waist", "neck", "sleeveLength", "armhole", "wrist", "topLength"],
+  kurtha: ["shoulder", "chest", "waist", "hip", "neck", "sleeveLength", "armhole", "wrist", "topLength"],
+  kurta: ["shoulder", "chest", "waist", "hip", "neck", "sleeveLength", "armhole", "wrist", "topLength"],
+  blouse: ["bust", "underBust", "waist", "shoulder", "armhole", "sleeveLength", "topLength", "frontNeckDepth", "backNeckDepth"],
+  pant: ["waist", "hip", "thigh", "kneeCircumference", "calf", "ankle", "crotchDepth", "inseam", "bottomlength"],
+  trouser: ["waist", "hip", "thigh", "kneeCircumference", "calf", "ankle", "crotchDepth", "inseam", "bottomlength"],
+  churidar: ["waist", "hip", "thigh", "kneeCircumference", "ankle", "crotchDepth", "bottomlength"],
+  coat: ["shoulder", "chest", "waist", "hip", "neck", "sleeveLength", "armhole", "wrist", "fullLength"],
+  blazer: ["shoulder", "chest", "waist", "hip", "neck", "sleeveLength", "armhole", "wrist", "fullLength"],
+  dress: ["bust", "waist", "hip", "shoulder", "armhole", "sleeveLength", "fullLength"],
+  gown: ["bust", "waist", "hip", "shoulder", "armhole", "sleeveLength", "fullLength"],
+  skirt: ["waist", "hip", "bottomlength", "flare"],
+  lehenga: ["waist", "hip", "bottomlength", "flare"],
 };
 
 export default function OrderDetailsPage() {
@@ -105,9 +142,27 @@ export default function OrderDetailsPage() {
     armhole: "",
     hipCircumference: "",
     kneeCircumference: "",
+    fullLength: "",
+    topLength: "",
     bottomlength: "",
     ankle: "",
+    bust: "",
+    underBust: "",
+    thigh: "",
+    calf: "",
+    crotchDepth: "",
+    inseam: "",
+    frontNeckDepth: "",
+    backNeckDepth: "",
+    flare: "",
   });
+
+  const outfitTemplateName = Object.keys(MEASUREMENT_TEMPLATES).find((name) =>
+    String(activeOutfit?.name || "").toLowerCase().includes(name)
+  );
+  const measurementKeys: MeasurementKey[] = outfitTemplateName
+    ? MEASUREMENT_TEMPLATES[outfitTemplateName]
+    : (Object.keys(DEFAULT_MEASUREMENT_CONFIG) as MeasurementKey[]);
 
   const [customMeasurements, setCustomMeasurements] = useState<CustomMeasurement[]>([]);
   const [newMeasurement, setNewMeasurement] = useState({
@@ -136,8 +191,19 @@ export default function OrderDetailsPage() {
           armhole: form.armhole || undefined,
           hipCircumference: form.hipCircumference || undefined,
           kneeCircumference: form.kneeCircumference || undefined,
+          fullLength: form.fullLength || undefined,
+          topLength: form.topLength || undefined,
           bottomlength: form.bottomlength || undefined,
           ankle: form.ankle || undefined,
+          bust: form.bust || undefined,
+          underBust: form.underBust || undefined,
+          thigh: form.thigh || undefined,
+          calf: form.calf || undefined,
+          crotchDepth: form.crotchDepth || undefined,
+          inseam: form.inseam || undefined,
+          frontNeckDepth: form.frontNeckDepth || undefined,
+          backNeckDepth: form.backNeckDepth || undefined,
+          flare: form.flare || undefined,
         },
         custom: customMeasurements,
       };
@@ -171,8 +237,19 @@ export default function OrderDetailsPage() {
         armhole: defaults.armhole || "",
         hipCircumference: defaults.hipCircumference || "",
         kneeCircumference: defaults.kneeCircumference || "",
+        fullLength: defaults.fullLength || "",
+        topLength: defaults.topLength || "",
         bottomlength: defaults.bottomlength || "",
         ankle: defaults.ankle || "",
+        bust: defaults.bust || "",
+        underBust: defaults.underBust || "",
+        thigh: defaults.thigh || "",
+        calf: defaults.calf || "",
+        crotchDepth: defaults.crotchDepth || "",
+        inseam: defaults.inseam || "",
+        frontNeckDepth: defaults.frontNeckDepth || "",
+        backNeckDepth: defaults.backNeckDepth || "",
+        flare: defaults.flare || "",
       });
       setCustomMeasurements(outfit.measurements.custom || []);
     } else {
@@ -188,8 +265,19 @@ export default function OrderDetailsPage() {
         armhole: "",
         hipCircumference: "",
         kneeCircumference: "",
+        fullLength: "",
+        topLength: "",
         bottomlength: "",
         ankle: "",
+        bust: "",
+        underBust: "",
+        thigh: "",
+        calf: "",
+        crotchDepth: "",
+        inseam: "",
+        frontNeckDepth: "",
+        backNeckDepth: "",
+        flare: "",
       });
       setCustomMeasurements([]);
     }
@@ -226,7 +314,9 @@ const handleAudioRecorded = async (file: File) => {
     }));
 
     try {
-      const res = await api.get(`/api/orders/count-by-date?date=${date}`);
+      const res = await api.get("/api/orders/count-by-date", {
+        params: { date: date.split("T")[0] },
+      });
       console.log("Order count response:", res.data);
       setDailyOrderCount(res.data.totalOrders);
       setOrderLimit(res.data.limit);
@@ -312,8 +402,19 @@ const handleAudioRecorded = async (file: File) => {
         armhole: form.armhole || undefined,
         hipCircumference: form.hipCircumference || undefined,
         kneeCircumference: form.kneeCircumference || undefined,
+        fullLength: form.fullLength || undefined,
+        topLength: form.topLength || undefined,
         bottomlength: form.bottomlength || undefined,
         ankle: form.ankle || undefined,
+        bust: form.bust || undefined,
+        underBust: form.underBust || undefined,
+        thigh: form.thigh || undefined,
+        calf: form.calf || undefined,
+        crotchDepth: form.crotchDepth || undefined,
+        inseam: form.inseam || undefined,
+        frontNeckDepth: form.frontNeckDepth || undefined,
+        backNeckDepth: form.backNeckDepth || undefined,
+        flare: form.flare || undefined,
       },
       custom: customMeasurements,
     };
@@ -368,6 +469,7 @@ const handleAudioRecorded = async (file: File) => {
   };
 
   const removeReferenceImage = (imageUrl: string) => {
+    if (!window.confirm("Remove this reference image?")) return;
     setOrderData((prev: any) => {
       const outfits = [...prev.outfits];
       outfits[activeOutfitIndex] = {
@@ -398,8 +500,19 @@ const handleAudioRecorded = async (file: File) => {
         armhole: form.armhole || undefined,
         hipCircumference: form.hipCircumference || undefined,
         kneeCircumference: form.kneeCircumference || undefined,
+        fullLength: form.fullLength || undefined,
+        topLength: form.topLength || undefined,
         bottomlength: form.bottomlength || undefined,
         ankle: form.ankle || undefined,
+        bust: form.bust || undefined,
+        underBust: form.underBust || undefined,
+        thigh: form.thigh || undefined,
+        calf: form.calf || undefined,
+        crotchDepth: form.crotchDepth || undefined,
+        inseam: form.inseam || undefined,
+        frontNeckDepth: form.frontNeckDepth || undefined,
+        backNeckDepth: form.backNeckDepth || undefined,
+        flare: form.flare || undefined,
       },
       custom: customMeasurements,
     };
@@ -415,6 +528,7 @@ const handleAudioRecorded = async (file: File) => {
   };
 
   const removeCustomMeasurement = (index: number) => {
+    if (!window.confirm("Remove this custom measurement?")) return;
     setCustomMeasurements((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -504,7 +618,7 @@ const handleAudioRecorded = async (file: File) => {
 {activeOutfit.audioUrl && (
   <button
     onClick={() =>
-      updateOutfit("audioUrl", undefined)
+      window.confirm("Remove this audio note?") && updateOutfit("audioUrl", undefined)
     }
     className="text-red-600 text-sm mt-1"
   >
@@ -584,10 +698,11 @@ const handleAudioRecorded = async (file: File) => {
 
         <div>
           <label className="text-md font-semibold text-gray-600">
-            Trial Date
+            Trial Date and Time
           </label>
           <input
-            type="date"
+            type="datetime-local"
+            step="900"
             className="border p-2 rounded-xl hover:border-emerald-500 w-full mt-3"
             value={activeOutfit.trialDate ?? ""}
             onChange={(e) => updateOutfit("trialDate", e.target.value)}
@@ -596,10 +711,11 @@ const handleAudioRecorded = async (file: File) => {
 
         <div>
           <label className="text-md font-semibold text-gray-600">
-            Delivery Date
+            Delivery Date and Time
           </label>
           <input
-            type="date"
+            type="datetime-local"
+            step="900"
             className="border p-2 rounded-xl hover:border-emerald-500 w-full mt-3"
             value={activeOutfit.deliveryDate ?? ""}
             onChange={(e) => handleDeliveryDateChange(e.target.value)}
@@ -653,9 +769,14 @@ const handleAudioRecorded = async (file: File) => {
 
       <div className="p-6 rounded-lg space-y-6">
         <h2 className="font-semibold text-xl">Measurements</h2>
+        <p className="text-sm text-gray-500">
+          {outfitTemplateName
+            ? `Recommended measurements for ${activeOutfit?.name}. Add a custom measurement below if needed.`
+            : "Complete measurement set for this custom outfit. Fill only the measurements you need."}
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {(Object.keys(form) as (keyof typeof form)[]).map((key) => {
+          {measurementKeys.map((key) => {
             const config = DEFAULT_MEASUREMENT_CONFIG[key];
             return (
               <div
@@ -665,7 +786,11 @@ const handleAudioRecorded = async (file: File) => {
                 <img
                   src={config.image}
                   alt={config.label}
-                  className="w-24 h-24 rounded-xl object-cover"
+                  className={`h-24 w-24 shrink-0 bg-white object-contain ${
+                    key === "fullLength" || key === "topLength"
+                      ? "border-4 border-white shadow-sm"
+                      : ""
+                  }`}
                 />
                 <div className="flex-1">
                   <label className="block text-sm font-medium mb-1">
@@ -781,7 +906,7 @@ const handleAudioRecorded = async (file: File) => {
             className="w-full h-full object-cover"
           />
 
-          {(Object.keys(form) as (keyof typeof form)[]).map((key) => {
+          {measurementKeys.map((key) => {
             const config = DEFAULT_MEASUREMENT_CONFIG[key];
             if (!form[key]) return null;
 

@@ -13,6 +13,7 @@ export default function OtpClient() {
   const [otp, setOtp] = useState(Array(6).fill(""));
   const [timer, setTimer] = useState(60);
   const [loading, setLoading] = useState(false);
+  const [accountCreated, setAccountCreated] = useState(false);
 
   useEffect(() => {
   
@@ -55,10 +56,12 @@ export default function OtpClient() {
         { email, otp: finalOtp },
       );
 
-      console.log(res.data, 'res.data from verify otp')
+      if (res.data.accountCreated) {
+        setAccountCreated(true);
+        return;
+      }
 
       setAccessToken(res.data.accessToken)
-      localStorage.setItem("accessToken", res.data.accessToken);
 
       if (!res.data.user.isProfileCompleted && res.data.user.role === "owner") {
 
@@ -154,6 +157,19 @@ return (
     </div>
 
   </div>
+
+  {accountCreated && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" aria-labelledby="account-created-title">
+      <div className="w-full max-w-sm bg-white p-7 text-center shadow-xl">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-100 text-2xl font-bold text-emerald-700">✓</div>
+        <h2 id="account-created-title" className="mt-5 text-2xl font-bold text-gray-900">Account created successfully</h2>
+        <p className="mt-3 text-sm leading-6 text-gray-600">Your email has been verified. Please sign in to continue to your TailorPro dashboard.</p>
+        <button type="button" onClick={() => router.replace("/auth")} className="mt-6 w-full bg-emerald-600 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
+          Go to login
+        </button>
+      </div>
+    </div>
+  )}
 </div>
 
   );

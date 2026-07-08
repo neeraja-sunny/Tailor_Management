@@ -6,8 +6,10 @@ import { useState } from "react";
 import Link from "next/link";
 
 export default function Topbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const [open, setOpen] = useState(false);
+
+  if (loading || !user) return null;
 
   return (
     <header className="no-print w-full bg-white shadow-md px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between relative">
@@ -24,7 +26,7 @@ export default function Topbar() {
           className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-emerald-100 rounded-full text-sm sm:text-base hover:bg-emerald-200 transition"
         >
           <span className="max-w-[120px] sm:max-w-none truncate">
-            {user?.fullName || "User"}
+            {user.fullName || user.email}
           </span>
 
           <ChevronRight

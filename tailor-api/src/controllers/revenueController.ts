@@ -8,8 +8,9 @@ export const getRevenueSummary = async (req: Request, res: Response) => {
 
     const match: any = {
       boutique: boutiqueId,
-      status: "delivered",
-      balanceDue: 0,
+      status: { $ne: "cancelled" },
+      isArchived: false,
+      advanceGiven: { $gt: 0 },
     };
 
     if (year && month) {
@@ -24,7 +25,7 @@ export const getRevenueSummary = async (req: Request, res: Response) => {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: "$totalAmount" },
+          totalRevenue: { $sum: "$advanceGiven" },
         },
       },
     ]);
@@ -45,8 +46,9 @@ export const getDailyRevenue = async (req: Request, res: Response) => {
 
     const match: any = {
       boutique: boutiqueId,
-      status: "delivered",
-      balanceDue: 0,
+      status: { $ne: "cancelled" },
+      isArchived: false,
+      advanceGiven: { $gt: 0 },
     };
 
     if (year && month) {
@@ -68,7 +70,7 @@ export const getDailyRevenue = async (req: Request, res: Response) => {
               },
             },
           },
-          total: { $sum: "$totalAmount" },
+          total: { $sum: "$advanceGiven" },
         },
       },
       { $sort: { "_id.date": 1 } },
@@ -95,19 +97,18 @@ export const getRevenueBreakdownByDate = async (
 
     const orders = await Order.find({
       boutique: boutiqueId,
-      status: "delivered",
-      balanceDue: 0,
+      status: { $ne: "cancelled" },
+      isArchived: false,
+      advanceGiven: { $gt: 0 },
       updatedAt: { $gte: start, $lt: end },
-    }).select("orderNumber totalAmount items createdAt");
-
-    console.log(orders, "orders from revenue breakdown - delivered one");
+    }).select("orderNumber advanceGiven items updatedAt");
 
     res.json(
       orders.map((o) => ({
         orderNumber: o.orderNumber,
-        totalAmount: o.totalAmount,
+        totalAmount: o.advanceGiven,
         outfits: o.items.length,
-        date: o.createdAt,
+        date: o.updatedAt,
       }))
     );
   } catch (err) {

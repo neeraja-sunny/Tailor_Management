@@ -85,7 +85,7 @@ export default function RevenueBreakdownPage() {
           </div>
         ) : orders.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
-            No delivered orders found for this date
+            No payments received for this date
           </div>
         ) : (
           <div className="overflow-x-auto">

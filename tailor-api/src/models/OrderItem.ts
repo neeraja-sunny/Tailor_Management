@@ -22,8 +22,19 @@ const MeasurementsSchema = new Schema(
       armhole: String,
       hipCircumference: String,
       kneeCircumference: String,
+      fullLength: String,
+      topLength: String,
       bottomlength: String,
       ankle: String,
+      bust: String,
+      underBust: String,
+      thigh: String,
+      calf: String,
+      crotchDepth: String,
+      inseam: String,
+      frontNeckDepth: String,
+      backNeckDepth: String,
+      flare: String,
     },
     custom: [CustomMeasurementSchema],
   },
@@ -60,8 +71,19 @@ export interface IOrderItem extends Document {
       armhole: string;
       hipCircumference: string;
       kneeCircumference: string;
+      fullLength: string;
+      topLength: string;
       bottomlength: string;
       ankle: string;
+      bust?: string;
+      underBust?: string;
+      thigh?: string;
+      calf?: string;
+      crotchDepth?: string;
+      inseam?: string;
+      frontNeckDepth?: string;
+      backNeckDepth?: string;
+      flare?: string;
     };
     custom?: {
       name: string;
@@ -121,8 +143,11 @@ const orderitemSchema = new Schema<IOrderItem>(
   deliveryDate: Date,
 
   boutique: { type: mongoose.Schema.Types.ObjectId, ref: "Boutique", required: true },
+  assignedStaff: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 },
   { timestamps: true }
 );
+
+orderitemSchema.index({ boutique: 1, deliveryDate: 1 });
 
 export default mongoose.model<IOrderItem>("OrderItem", orderitemSchema);

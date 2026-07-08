@@ -2,26 +2,21 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface ITransaction extends Document {
 
-    order?: mongoose.Schema.Types.ObjectId;
+   order?: mongoose.Schema.Types.ObjectId;
 
-    invoiceNumber: string;
+   invoiceNumber: string;
 
-    amount?: number;
+   amount?: number;
 
-    advance?: number;
+   advance?: number;
 
-    balance?: number;
+   balance?: number;
 
-    invoiceDate: Date;
+   invoiceDate: Date;
 
-    payments?: {
-         amount: number;
-            date: Date;
-            method: string;
-            note: string;
-    }[];
+   payments?: mongoose.Schema.Types.ObjectId[];
 
-    pdfUrl?: string;
+   pdfUrl?: string;
 }
 
 const transactionSchema = new Schema<ITransaction>(
@@ -38,12 +33,7 @@ const transactionSchema = new Schema<ITransaction>(
 
   invoiceDate: { type: Date, default: Date.now },
 
-  payments: [{
-     amount: Number,
-     date: Date,
-     method: String,
-     note: String
-  }],
+  payments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Payment" }],
   
   pdfUrl: String
 

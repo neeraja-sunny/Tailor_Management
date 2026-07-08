@@ -3,11 +3,13 @@
 import { useAuth } from '@/app/context/AuthContext'
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import clsx from 'clsx'
 
 export default function Header() {
-  const { user, logout } = useAuth()
+  const { user, logout, loading } = useAuth()
+  const pathname = usePathname() || ''
   const [open, setOpen] = useState(false)
 
   const [mounted, setMounted] = useState(false);
@@ -17,6 +19,8 @@ useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
   const isLoggedIn = !!user
+  const isAccountArea =
+    pathname.startsWith('/tailor/dashboard') || pathname === '/tailor/profile'
 
   return (
     <header
@@ -31,7 +35,7 @@ useEffect(() => setMounted(true), []);
         
         {/* Left: Logo */}
         <div className="flex items-center gap-10">
-          <Link href="/tailor/dashboard" className="flex items-center gap-1 ml-0">
+          <Link href={isLoggedIn ? "/tailor/dashboard" : "/tailor"} className="flex items-center gap-1 ml-0">
             <img
               src="/dressmaker.png"
               alt="TailorPro Logo"
@@ -43,7 +47,7 @@ useEffect(() => setMounted(true), []);
           </Link>
 
           {/* Navigation links — ONLY when logged OUT */}
-          {!isLoggedIn && (
+          {!loading && !isAccountArea && (
             <nav className="hidden md:flex gap-8 text-lg text-black">
               {['Customers', 'Blogs', 'Pricing'].map((link) => (
                 <Link
@@ -61,7 +65,9 @@ useEffect(() => setMounted(true), []);
 
         {/* Right side */}
         <div className="flex items-center justify-end w-full max-w-xs">
-          {!isLoggedIn ? (
+          {loading ? (
+            <div className="h-12 w-32" aria-hidden="true" />
+          ) : !isLoggedIn ? (
             <Link
               href="/auth"
               className="
@@ -75,7 +81,7 @@ useEffect(() => setMounted(true), []);
                 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-xl shadow-emerald-700
               "
             >
-              Join Now
+              Login
               <span className="flex items-center justify-center h-6 w-6 rounded-full bg-black">
                 <ChevronRight size={16} className="text-white" />
               </span>
@@ -108,7 +114,15 @@ useEffect(() => setMounted(true), []);
                 }`}
               >
                 <Link
+                  href="/tailor/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="block px-6 py-4 hover:bg-gray-100 text-md font-medium"
+                >
+                  Dashboard
+                </Link>
+                <Link
                   href="/tailor/profile"
+                  onClick={() => setOpen(false)}
                   className="block px-6 py-4 hover:bg-gray-100 text-md font-medium"
                 >
                   Profile

@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import api from "@/lib/axios";
-import { Trash2, X } from "lucide-react";
+import { BadgeCheck, CircleDollarSign, CircleX, Trash2, TriangleAlert, WalletCards, X } from "lucide-react";
+
+const allowedFilters = new Set([
+  "all", "active", "pending", "draft", "past_due", "upcoming", "pending_payment",
+  "delivered", "cancelled", "no_advance", "partial_payment", "payment_overdue",
+  "payment_due", "paid",
+]);
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -12,10 +18,17 @@ export default function OrdersPage() {
 
   const [deleteOrderId, setDeleteOrderId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
 
 
   useEffect(() => {
     fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    const nextFilter = new URLSearchParams(window.location.search).get("filter");
+    if (nextFilter && allowedFilters.has(nextFilter)) setFilter(nextFilter);
   }, []);
 
   const handleDeleteOrder = async () => {
@@ -24,8 +37,10 @@ export default function OrdersPage() {
   try {
     setDeleting(true);
     await api.delete(`/api/orders/${deleteOrderId}/delete`);
+    setOrders((currentOrders) =>
+      currentOrders.filter((order) => order._id !== deleteOrderId)
+    );
     setDeleteOrderId(null);
-    fetchOrders();
   } catch (err) {
     console.error("Failed to delete order", err);
   } finally {
@@ -33,14 +48,36 @@ export default function OrdersPage() {
   }
 };
 
+  const handleCancelOrder = async () => {
+    if (!cancelOrderId) return;
+    try {
+      setCancelling(true);
+      await api.patch(`/api/orders/${cancelOrderId}/status`, { status: "cancelled" });
+      setOrders((currentOrders) =>
+        currentOrders.map((order) =>
+          order._id === cancelOrderId ? { ...order, status: "cancelled" } : order
+        )
+      );
+      setCancelOrderId(null);
+      setFilter("cancelled");
+    } catch (err) {
+      console.error("Failed to cancel order", err);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
 
 const filterColors: any = {
+  all: "text-gray-900 border-gray-900",
   active: "text-emerald-700 border-emerald-700",
+  pending: "text-amber-700 border-amber-700",
   draft: "text-blue-600 border-blue-600",
   past_due: "text-red-600 border-red-600",
   upcoming: "text-purple-600 border-purple-600",
   pending_payment: "text-orange-600 border-orange-600",
   delivered: "text-yellow-600 border-yellow-600",
+  cancelled: "text-gray-700 border-gray-700",
 };
 
 const statusBadge: any = {
@@ -50,7 +87,15 @@ const statusBadge: any = {
   upcoming: "bg-purple-100 text-purple-700",
   pending_payment: "bg-orange-100 text-orange-700",
   delivered: "bg-yellow-100 text-yellow-700",
+  cancelled: "bg-gray-200 text-gray-700",
 }
+
+const paymentFilters = [
+  { key: "no_advance", label: "No Advance", icon: WalletCards, tone: "text-red-700 bg-red-50" },
+  { key: "partial_payment", label: "Partial Payment", icon: CircleDollarSign, tone: "text-amber-700 bg-amber-50" },
+  { key: "payment_overdue", label: "Overdue After Delivery", icon: TriangleAlert, tone: "text-red-700 bg-red-50" },
+  { key: "paid", label: "Paid in Full", icon: BadgeCheck, tone: "text-emerald-700 bg-emerald-50" },
+];
 
 
 const getItemDates = (order: any) =>
@@ -58,8 +103,6 @@ const getItemDates = (order: any) =>
     .map((i: any) => i.deliveryDate)
     .filter(Boolean)
     .map((d: string) => new Date(d));
-
-    console.log(getItemDates,'item dates')
 
 const hasPastDueItem = (order: any, today: Date) =>
   getItemDates(order).some((d: any) => d < today);
@@ -71,9 +114,7 @@ const hasUpcomingItem = (order: any, today: Date) =>
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      console.log("Fetching orders...");
       const res = await api.get("/api/orders/all");
-      console.log(res.data.orders, "📦");
       setOrders(res.data.orders || []);
     } catch (err) {
       console.error("Failed to fetch orders:", err);
@@ -95,19 +136,40 @@ const hasUpcomingItem = (order: any, today: Date) =>
   const today = new Date();
 
   const filteredOrders = orders.filter((o) => {
-   
-  const delivery = o?.deliveryDate ? new Date(o.deliveryDate) : null;
+
+    if (filter === "all") return o.status !== "cancelled";
+    if (filter === "pending") return o.status !== "delivered" && o.status !== "cancelled";
+    if (filter === "payment_due") return (o.balanceDue || 0) > 0 && o.status !== "cancelled";
+    if (filter === "no_advance") return (o.totalAmount || 0) > 0 && (o.advanceGiven || 0) === 0 && (o.balanceDue || 0) > 0 && o.status !== "cancelled";
+    if (filter === "partial_payment") return (o.advanceGiven || 0) > 0 && (o.balanceDue || 0) > 0 && o.status !== "cancelled";
+    if (filter === "payment_overdue") return o.status === "delivered" && (o.balanceDue || 0) > 0;
+    if (filter === "paid") return (o.totalAmount || 0) > 0 && (o.balanceDue || 0) === 0 && o.status !== "cancelled";
 
     if (filter === "active") return o.status === "active";
     if (filter === "draft") return o.status === "draft";
-    if (filter === "past_due") return ( hasPastDueItem(o, today) && o.status !== "delivered");
+    if (filter === "past_due") return (hasPastDueItem(o, today) && o.status !== "delivered" && o.status !== "cancelled");
     if (filter === "upcoming") return ( hasUpcomingItem(o, today) && o.status === "active");
     if (filter === "pending_payment") return (o.balanceDue || 0) > 0 && o.status === "delivered";
     if (filter === "delivered") return o.status === "delivered" && o.balanceDue == 0;
+    if (filter === "cancelled") return o.status === "cancelled";
   
   return true;
 
   });
+
+  const paymentCounts = {
+    no_advance: orders.filter((o) => (o.totalAmount || 0) > 0 && (o.advanceGiven || 0) === 0 && (o.balanceDue || 0) > 0 && o.status !== "cancelled").length,
+    partial_payment: orders.filter((o) => (o.advanceGiven || 0) > 0 && (o.balanceDue || 0) > 0 && o.status !== "cancelled").length,
+    payment_overdue: orders.filter((o) => o.status === "delivered" && (o.balanceDue || 0) > 0).length,
+    paid: orders.filter((o) => (o.totalAmount || 0) > 0 && (o.balanceDue || 0) === 0 && o.status !== "cancelled").length,
+  };
+
+  const paymentLabel = (order: any) => {
+    if ((order.balanceDue || 0) === 0) return { text: "Paid in full", style: "bg-emerald-50 text-emerald-700" };
+    if (order.status === "delivered") return { text: "Payment overdue", style: "bg-red-50 text-red-700" };
+    if ((order.advanceGiven || 0) === 0) return { text: "No advance", style: "bg-red-50 text-red-700" };
+    return { text: "Balance due", style: "bg-amber-50 text-amber-700" };
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8">
@@ -121,8 +183,25 @@ const hasUpcomingItem = (order: any, today: Date) =>
         </Link>
       </div>
 
+      <section className="grid grid-cols-2 border border-gray-200 bg-white lg:grid-cols-4">
+        {paymentFilters.map(({ key, label, icon: Icon, tone }) => (
+          <button
+            type="button"
+            key={key}
+            onClick={() => setFilter(key)}
+            className={`flex min-h-20 items-center gap-3 border-b border-r border-gray-200 p-4 text-left hover:bg-gray-50 lg:border-b-0 ${filter === key ? "ring-2 ring-inset ring-gray-900" : ""}`}
+          >
+            <span className={`grid h-10 w-10 shrink-0 place-items-center ${tone}`}><Icon size={19} /></span>
+            <span>
+              <strong className="block text-xl text-gray-900">{paymentCounts[key as keyof typeof paymentCounts]}</strong>
+              <span className="text-xs font-medium text-gray-500">{label}</span>
+            </span>
+          </button>
+        ))}
+      </section>
+
       <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-hide">
-        {["active", "draft", "past_due", "upcoming", "pending_payment", "delivered"].map((f) => (
+        {["all", "active", "pending", "draft", "past_due", "upcoming", "delivered", "cancelled"].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -151,43 +230,6 @@ const hasUpcomingItem = (order: any, today: Date) =>
                 <Trash2 size={18} />
               </button>
 
-              {deleteOrderId && (
-                <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-                  <div className="bg-white rounded-xl p-5 sm:p-6 w-[92%] max-w-md shadow-lg">
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-lg font-semibold text-gray-800">
-                        Delete Order?
-                      </h2>
-                      <button onClick={() => setDeleteOrderId(null)}>
-                        <X />
-                      </button>
-                    </div>
-
-                    <p className="text-gray-600 mb-6">
-                      Are you sure you want to delete this order?  
-                      This action cannot be undone.
-                    </p>
-
-                    <div className="flex justify-end gap-3">
-                      <button
-                        onClick={() => setDeleteOrderId(null)}
-                        className="px-5 py-3 sm:px-4 sm:py-2 rounded-full border"
-                      >
-                        Cancel
-                      </button>
-
-                      <button
-                        onClick={handleDeleteOrder}
-                        disabled={deleting}
-                        className="px-5 py-3 sm:px-4 sm:py-2 rounded-full bg-red-600 text-white hover:bg-red-700"
-                      >
-                        {deleting ? "Deleting..." : "Delete"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               <span
                 className={`absolute top-3 left-3 px-3 py-1 text-xs font-semibold rounded-full capitalize
                 ${statusBadge[order.status]}`}
@@ -208,6 +250,19 @@ const hasUpcomingItem = (order: any, today: Date) =>
                   <span>Total</span>
                   <span className="font-semibold">₹{order.totalAmount ?? 0}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Advance</span>
+                  <span className="font-semibold">₹{order.advanceGiven ?? 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Balance</span>
+                  <span className="font-semibold">₹{order.balanceDue ?? 0}</span>
+                </div>
+                {order.status !== "cancelled" && (
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold ${paymentLabel(order).style}`}>
+                    {paymentLabel(order).text}
+                  </span>
+                )}
               </div>
 
               <div className="mt-5 flex flex-col gap-2">
@@ -224,6 +279,17 @@ const hasUpcomingItem = (order: any, today: Date) =>
                 >
                   View Outfit Details
                 </Link>
+
+                {order.status !== "delivered" && order.status !== "cancelled" && (
+                  <button
+                    type="button"
+                    onClick={() => setCancelOrderId(order._id)}
+                    className="flex w-full items-center justify-center gap-2 border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+                  >
+                    <CircleX size={16} />
+                    Cancel Order
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -232,6 +298,60 @@ const hasUpcomingItem = (order: any, today: Date) =>
           <p className="text-gray-600 font-semibold">No orders found.</p>
         )}
       </div>
+
+      {deleteOrderId && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-5 sm:p-6 w-[92%] max-w-md shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">Delete Order?</h2>
+              <button
+                onClick={() => setDeleteOrderId(null)}
+                aria-label="Close delete confirmation"
+              >
+                <X />
+              </button>
+            </div>
+
+            <p className="text-gray-600 mb-6">
+              This removes the order from normal lists. Its record remains archived.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteOrderId(null)}
+                className="px-5 py-3 sm:px-4 sm:py-2 rounded-full border"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteOrder}
+                disabled={deleting}
+                className="px-5 py-3 sm:px-4 sm:py-2 rounded-full bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelOrderId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-[92%] max-w-md bg-white p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-800">Cancel Order?</h2>
+              <button onClick={() => setCancelOrderId(null)} aria-label="Close cancellation confirmation"><X /></button>
+            </div>
+            <p className="mb-6 text-gray-600">The order will move to the Cancelled list and its details will remain available.</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setCancelOrderId(null)} className="border px-4 py-2">Keep Order</button>
+              <button onClick={handleCancelOrder} disabled={cancelling} className="bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-60">
+                {cancelling ? "Cancelling..." : "Cancel Order"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -58,6 +58,8 @@ const customerSchema = new Schema<ICustomer>(
 
 );
 
+customerSchema.index({ boutique: 1, createdAt: -1 });
+
 export default mongoose.model<ICustomer>("Customer", customerSchema);
 
 

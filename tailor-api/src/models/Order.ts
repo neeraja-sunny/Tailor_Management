@@ -18,6 +18,12 @@ export interface IOrder extends Document {
 
     balanceDue?: number;
 
+    discountType?: "fixed" | "percentage";
+
+    discountValue?: number;
+
+    discountAmount?: number;
+
     status?: "draft" | "active" | "past_due" | "upcoming" | "pending_payment" | "delivered" | "cancelled";
 
     additionalCharges?: {
@@ -29,6 +35,8 @@ export interface IOrder extends Document {
     createdAt: Date;
 
     updatedAt?: Date;
+
+    deliveredAt?: Date;
 
     notes?: string;
 
@@ -58,6 +66,12 @@ const orderSchema = new Schema<IOrder>(
 
   balanceDue: { type: Number, default: 0 },
 
+  discountType: { type: String, enum: ["fixed", "percentage"] },
+
+  discountValue: { type: Number, default: 0, min: 0 },
+
+  discountAmount: { type: Number, default: 0, min: 0 },
+
   status: { 
     type: String, 
     enum: ["draft","active","past_due","upcoming","pending_payment","delivered","cancelled"], 
@@ -77,6 +91,8 @@ const orderSchema = new Schema<IOrder>(
 
   updatedAt: Date,
 
+  deliveredAt: Date,
+
   notes: String,
   
   isArchived: { type: Boolean, default: false },
@@ -88,5 +104,7 @@ const orderSchema = new Schema<IOrder>(
   { timestamps: true }
 
 );
+
+orderSchema.index({ boutique: 1, isArchived: 1, createdAt: -1 });
 
 export default mongoose.model<IOrder>("Order", orderSchema);

@@ -4,6 +4,7 @@ import OrderItem from "../models/OrderItem";
 import Measurement from "../models/Measurement";
 import { generateOrderNumber } from "../utils/generateOrderNumber";
 import Boutique from "../models/Boutique";
+import { sendEmail } from "../utils/emailService";
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
@@ -49,6 +50,7 @@ for (const date of uniqueDeliveryDates) {
   end.setHours(23, 59, 59, 999);
 
   const ordersCount = await OrderItem.countDocuments({
+    boutique: boutiqueId,
     deliveryDate: { $gte: start, $lte: end },
   });
 
@@ -125,27 +127,31 @@ for (const date of uniqueDeliveryDates) {
 // Get All Orders
 export const getAllOrders = async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-        let boutiqueId;
-
-    if (user.role === "owner") {
-      boutiqueId = user.activeBoutique;
-    }
-
-    if (user.role === "staff") {
-      boutiqueId = user.boutique;
-    }
+    const boutiqueId = (req as any).boutiqueId;
 
     if (!boutiqueId) {
       return res.status(400).json({ message: "No boutique found" });
     }
-    const orders = await Order.find({ boutique: boutiqueId, isArchived: false, })
-      .populate("customer")
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Number(req.query.limit) || 50, 200);
+
+    const filter = { boutique: boutiqueId, isArchived: false };
+    const total = await Order.countDocuments(filter);
+
+    const orders = await Order.find(filter)
+      .select("orderNumber customer items totalAmount advanceGiven balanceDue status createdAt deliveredAt")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("customer", "name")
       .populate({
         path: "items",
-        model: "OrderItem"
-      });
-    return res.json({ orders });
+        model: "OrderItem",
+        select: "name deliveryDate trialDate status",
+      })
+      .lean();
+
+    return res.json({ orders, meta: { page, limit, total } });
   } catch (err: any) {
     return res.status(500).json({ message: err.message });
   }
@@ -172,9 +178,13 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     if (!allowed.includes(status))
       return res.status(400).json({ message: "Invalid status" });
 
+    const statusUpdate = status === "delivered"
+      ? { $set: { status, deliveredAt: new Date() } }
+      : { $set: { status }, $unset: { deliveredAt: "" } };
+
     const order = await Order.findOneAndUpdate(
       { boutique: boutiqueId, _id: orderId },
-      { status },
+      statusUpdate,
       { new: true }
     );
 
@@ -245,6 +255,91 @@ export const receivePayment = async (req: Request, res: Response) => {
   }
 };
 
+export const sendInvoiceEmail = async (req: Request, res: Response) => {
+  try {
+    const boutiqueId = (req as any).boutiqueId;
+    const invoice = (req as any).file;
+    if (!invoice?.buffer) {
+      return res.status(400).json({ message: "Invoice PDF is required" });
+    }
+
+    const order = await Order.findOne({ boutique: boutiqueId, _id: req.params.id })
+      .populate("customer", "name email");
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    const customer = order.customer as any;
+    if (!customer?.email) {
+      return res.status(400).json({ message: "This customer does not have an email address" });
+    }
+
+    const total = Number(order.totalAmount || 0).toLocaleString("en-IN");
+    const paid = Number(order.advanceGiven || 0).toLocaleString("en-IN");
+    const balance = Number(order.balanceDue || 0).toLocaleString("en-IN");
+    await sendEmail(
+      customer.email,
+      `Invoice ${order.orderNumber} from TailorPro`,
+      {
+        text: `Hello ${customer.name || "Customer"},\n\nYour invoice ${order.orderNumber} is attached.\nTotal: INR ${total}\nPaid: INR ${paid}\nBalance due: INR ${balance}\n\nThank you.`,
+        attachments: [
+          {
+            filename: `Invoice-${order.orderNumber}.pdf`,
+            content: invoice.buffer,
+            contentType: "application/pdf",
+          },
+        ],
+      }
+    );
+
+    return res.json({ message: `Invoice sent to ${customer.email}` });
+  } catch (error) {
+    console.error("SEND INVOICE ERROR:", error);
+    return res.status(500).json({ message: "Unable to email invoice" });
+  }
+};
+
+const roundMoney = (value: number) => Math.round(value * 100) / 100;
+
+const recalculateDiscountedTotal = (order: any, grossAmount: number) => {
+  const safeGross = Math.max(roundMoney(grossAmount), 0);
+  const value = Math.max(Number(order.discountValue) || 0, 0);
+  const discount = order.discountType === "percentage"
+    ? safeGross * Math.min(value, 100) / 100
+    : Math.min(value, safeGross);
+
+  order.discountAmount = roundMoney(discount);
+  order.totalAmount = roundMoney(safeGross - order.discountAmount);
+  order.balanceDue = roundMoney(Math.max(order.totalAmount - (order.advanceGiven || 0), 0));
+};
+
+export const applyOrderDiscount = async (req: Request, res: Response) => {
+  try {
+    const boutiqueId = (req as any).boutiqueId;
+    const type = req.body.type?.toString();
+    const value = Number(req.body.value);
+
+    if (!["fixed", "percentage"].includes(type) || !Number.isFinite(value) || value < 0) {
+      return res.status(400).json({ message: "Enter a valid offer" });
+    }
+    if (type === "percentage" && value > 100) {
+      return res.status(400).json({ message: "Percentage cannot exceed 100" });
+    }
+
+    const order = await Order.findOne({ boutique: boutiqueId, _id: req.params.id });
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    const grossAmount = (order.totalAmount || 0) + (order.discountAmount || 0);
+    order.discountType = type as "fixed" | "percentage";
+    order.discountValue = value;
+    recalculateDiscountedTotal(order, grossAmount);
+    await order.save();
+
+    return res.json({ message: value === 0 ? "Offer removed" : "Offer applied", order });
+  } catch (err) {
+    console.error("APPLY DISCOUNT ERROR:", err);
+    return res.status(500).json({ message: "Unable to apply offer" });
+  }
+};
+
 
 
 export const addExtraCharge = async (req: Request, res: Response) => {
@@ -270,9 +365,9 @@ export const addExtraCharge = async (req: Request, res: Response) => {
       createdAt: new Date(),
     });
 
-    // Update totals
-    order.totalAmount = (order.totalAmount || 0) + amount;
-    order.balanceDue = (order.balanceDue || 0) + amount;
+    // Recalculate so percentage offers also apply to charges added later.
+    const grossAmount = (order.totalAmount || 0) + (order.discountAmount || 0) + amount;
+    recalculateDiscountedTotal(order, grossAmount);
 
     await order.save();
 
@@ -294,7 +389,7 @@ export const updateOutfitStatus = async (req: Request, res: Response) => {
     const boutiqueId = (req as any).boutiqueId;
 
     // Update OrderItem status
-    const item = await OrderItem.findById(itemId);
+    const item = await OrderItem.findOne({ _id: itemId, boutique: boutiqueId });
     if (!item) return res.status(404).json({ message: "Order item not found" });
 
     item.status = status;
@@ -311,6 +406,7 @@ export const updateOutfitStatus = async (req: Request, res: Response) => {
 
     if (allCompleted) {
       order.status = "delivered";
+      order.deliveredAt = order.deliveredAt || new Date();
       await order.save();
     }
 
@@ -321,6 +417,52 @@ export const updateOutfitStatus = async (req: Request, res: Response) => {
       orderUpdated: allCompleted ? "Order marked as delivered" : "No change",
     });
 
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const updateOutfitDetails = async (req: Request, res: Response) => {
+  try {
+    const boutiqueId = (req as any).boutiqueId;
+    const { itemId } = req.params;
+    const item = await OrderItem.findOne({ _id: itemId, boutique: boutiqueId });
+    if (!item) return res.status(404).json({ message: "Order item not found" });
+
+    const allowedFields = [
+      "name", "category", "type", "quantity", "inspirationLink",
+      "specialInstructions", "stitchingPrice", "additionalPrice",
+      "trialDate", "deliveryDate",
+    ] as const;
+
+    for (const field of allowedFields) {
+      if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+        (item as any)[field] = req.body[field] === "" && ["trialDate", "deliveryDate"].includes(field)
+          ? null
+          : req.body[field];
+      }
+    }
+
+    item.quantity = Math.max(Number(item.quantity) || 1, 1);
+    item.stitchingPrice = Math.max(Number(item.stitchingPrice) || 0, 0);
+    item.additionalPrice = Math.max(Number(item.additionalPrice) || 0, 0);
+    await item.save();
+
+    const order = await Order.findOne({ boutique: boutiqueId, items: itemId }).populate("items");
+    if (!order) return res.status(404).json({ message: "Parent order not found" });
+
+    const itemsTotal = (order.items as any[]).reduce(
+      (sum, current) => sum + ((current.stitchingPrice || 0) + (current.additionalPrice || 0)) * (current.quantity || 1),
+      0
+    );
+    const chargesTotal = (order.additionalCharges || []).reduce(
+      (sum: number, charge: any) => sum + (Number(charge.amount) || 0),
+      0
+    );
+    recalculateDiscountedTotal(order, itemsTotal + chargesTotal);
+    await order.save();
+
+    return res.json({ message: "Outfit details updated", item, order });
   } catch (err: any) {
     return res.status(500).json({ message: err.message });
   }
@@ -386,7 +528,8 @@ export const deleteOrder = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const order = await Order.findById(id);
+    const boutiqueId = (req as any).boutiqueId;
+    const order = await Order.findOne({ _id: id, boutique: boutiqueId });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });

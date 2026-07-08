@@ -1,8 +1,20 @@
 import nodemailer from "nodemailer";
 
-export const sendEmail = async (to: string, subject: string, text: string) => {
-  try {
-    const transporter = nodemailer.createTransport({
+export type EmailContent = {
+  text: string;
+  html?: string;
+  attachments?: Array<{
+    filename: string;
+    content: Buffer;
+    contentType: string;
+  }>;
+};
+
+let transporter: ReturnType<typeof nodemailer.createTransport> | undefined;
+
+const getTransporter = () => {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
       secure: false,
@@ -11,12 +23,24 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
         pass: process.env.EMAIL_PASS!,
       },
     });
+  }
 
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_USER!,
+  return transporter;
+};
+
+export const sendEmail = async (
+  to: string,
+  subject: string,
+  content: string | EmailContent,
+) => {
+  try {
+    const message = typeof content === "string" ? { text: content } : content;
+
+    const info = await getTransporter().sendMail({
+      from: `TailorPro <${process.env.EMAIL_USER!}>`,
       to,
       subject,
-      text,
+      ...message,
     });
 
     console.log("Email sent:", info.response);
@@ -25,23 +49,3 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
     throw err;
   }
 };
-
-
-// export const sendEmail = async (to: string, subject: string, text: string) => {
-//   const transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     port: 587,        // Use 587 for TLS, 465 for SSL
-//     secure: false,
-//     auth: {
-//       user: process.env.EMAIL_USER!,
-//       pass: process.env.EMAIL_PASS!,
-//     },
-//   });
-
-//   await transporter.sendMail({
-//     from: process.env.EMAIL_USER!,
-//     to,
-//     subject,
-//     text,
-//   });
-// };

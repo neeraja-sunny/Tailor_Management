@@ -18,8 +18,19 @@ interface IMeasurements {
     armhole?: string;
     hipCircumference?: string;
     kneeCircumference?: string;
+    fullLength?: string;
+    topLength?: string;
     bottomlength?: string;
     ankle?: string;
+    bust?: string;
+    underBust?: string;
+    thigh?: string;
+    calf?: string;
+    crotchDepth?: string;
+    inseam?: string;
+    frontNeckDepth?: string;
+    backNeckDepth?: string;
+    flare?: string;
   };
   custom?: ICustomMeasurement[];
 }
@@ -51,8 +62,19 @@ const MeasurementsSchema = new Schema<IMeasurements>({
     armhole: String,
     hipCircumference: String,
     kneeCircumference: String,
+    fullLength: String,
+    topLength: String,
     bottomlength: String,
     ankle: String,
+    bust: String,
+    underBust: String,
+    thigh: String,
+    calf: String,
+    crotchDepth: String,
+    inseam: String,
+    frontNeckDepth: String,
+    backNeckDepth: String,
+    flare: String,
   },
   custom: [CustomMeasurementSchema],
 });

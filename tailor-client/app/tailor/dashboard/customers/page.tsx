@@ -5,7 +5,7 @@ import api from "@/lib/axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AddCustomerModal from "@/components/customers/AddCustomerModal";
-import { User2 } from "lucide-react";
+import { Search, User2 } from "lucide-react";
 
 export default function SelectCustomerPage() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function SelectCustomerPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
+  const [search, setSearch] = useState("");
 
   // Fetch customers
   const fetchCustomers = async () => {
@@ -39,6 +40,12 @@ export default function SelectCustomerPage() {
   };
 
   console.log("Customers data:", customers);
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredCustomers = customers.filter((customer) =>
+    [customer.name, customer.phone, customer.city, customer.state]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(normalizedSearch))
+  );
 
   return (
     <div className="p-6">
@@ -67,9 +74,20 @@ export default function SelectCustomerPage() {
       {/* Loading */}
       {loading && <p>Loading customers...</p>}
 
+      <label className="relative mb-6 block max-w-xl">
+        <Search size={18} className="pointer-events-none absolute left-3 top-3.5 text-gray-400" />
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search by customer name, phone, or location"
+          className="h-11 w-full border border-gray-300 bg-white pl-10 pr-3 outline-none focus:border-emerald-600"
+        />
+      </label>
+
       {/* Customer List */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {customers.map((c) => (
+        {filteredCustomers.map((c) => (
         <div
   key={c._id}
   className="p-4 rounded-xl bg-white shadow hover:shadow-md border-4 border-t-emerald-500"
@@ -99,7 +117,7 @@ export default function SelectCustomerPage() {
 
         ))}
 
-         {!loading && customers.length === 0 && <p className="text-gray-600 font-semibold">No customers found.</p>}
+         {!loading && filteredCustomers.length === 0 && <p className="text-gray-600 font-semibold">No customers found.</p>}
       </div>
     </div>
   );

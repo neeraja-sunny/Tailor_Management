@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User  from "../models/User";
 import Boutique from "../models/Boutique";
+import bcrypt from "bcryptjs";
 
 export const getUser = async (req: Request, res: Response) => {
   try {
@@ -100,5 +101,48 @@ export const getUserProfile = async (req: Request, res: Response) => {
     return res.json({ user });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch profile" });
+  }
+};
+
+export const deleteAccount = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { password, confirmation } = req.body;
+    const user = await User.findById(userId).select("+password");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (confirmation?.toLowerCase().trim() !== user.email.toLowerCase()) {
+      return res.status(400).json({ message: "Type your email exactly to confirm" });
+    }
+    if (!user.password) {
+      return res.status(400).json({ message: "Set a password using Forgot password before deleting this account" });
+    }
+    if (!password || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ message: "Incorrect password" });
+    }
+
+    user.isActive = false;
+    user.deletedAt = new Date();
+    await user.save();
+
+    if (user.role === "owner") {
+      await User.updateMany(
+        { createdBy: user._id, role: "staff" },
+        { $set: { isActive: false } }
+      );
+    }
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: process.env.COOKIE_DOMAIN || undefined,
+      path: "/",
+    });
+
+    return res.json({ message: "Account deleted" });
+  } catch (error) {
+    console.error("deleteAccount error:", error);
+    return res.status(500).json({ message: "Unable to delete account" });
   }
 };

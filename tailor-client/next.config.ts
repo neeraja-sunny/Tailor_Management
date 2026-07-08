@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: process.cwd(),
+  },
   // async rewrites() {
   //   return [
   //     {
@@ -9,7 +12,6 @@ const nextConfig: NextConfig = {
   //     },
   //   ];
   // },
-  reactCompiler: true,
 };
 
 export default nextConfig;

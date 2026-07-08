@@ -26,14 +26,25 @@ export interface OutfitItem {
       waist?: string;
       hip?: string;
       shoulder?: string;
-      neck: string,
-    sleeveLength: string,
-    wrist: string,
-    armhole: string,
-    hipCircumference: string,
-    kneeCircumference: string,
-    bottomlength: string,
-    ankle: string,
+      neck?: string;
+      sleeveLength?: string;
+      wrist?: string;
+      armhole?: string;
+      hipCircumference?: string;
+      kneeCircumference?: string;
+      fullLength?: string;
+      topLength?: string;
+      bottomlength?: string;
+      ankle?: string;
+      bust?: string;
+      underBust?: string;
+      thigh?: string;
+      calf?: string;
+      crotchDepth?: string;
+      inseam?: string;
+      frontNeckDepth?: string;
+      backNeckDepth?: string;
+      flare?: string;
     };
     custom: CustomMeasurement[];
   };

@@ -69,6 +69,7 @@ useEffect(() => {
   };
 
   const remove = (index: number) => {
+    if (!window.confirm(`Remove ${selected[index]?.name || "this outfit"} from the order?`)) return;
     setSelected((prev) => prev.filter((_, i) => i !== index));
   };
 

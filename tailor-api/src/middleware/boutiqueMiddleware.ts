@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import Boutique from "../models/Boutique";
 
 export const requireBoutique = async (
   req: Request,
@@ -19,18 +18,18 @@ export const requireBoutique = async (
         });
       }
 
-      const boutique = await Boutique.findOne({
-        _id: (req as any).user.activeBoutique,
-        owner: (req as any).user.userId,
-      });
+      const activeBoutique = (req as any).user.activeBoutique.toString();
+      const canAccess = ((req as any).user.boutiques || []).some(
+        (id: any) => id.toString() === activeBoutique
+      );
 
-      if (!boutique) {
+      if (!canAccess) {
         return res.status(403).json({
           message: "Boutique access denied",
         });
       }
 
-      (req as any).boutiqueId = boutique._id;
+      (req as any).boutiqueId = (req as any).user.activeBoutique;
       return next();
     }
 

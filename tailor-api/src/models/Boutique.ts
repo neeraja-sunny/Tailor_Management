@@ -6,6 +6,10 @@ export interface IBoutique extends Document {
   tailorType?: "gents" | "ladies" | "both";
   shopPhoto?: string;
   dailyOrderLimit: number;
+  gstNumber?: string;
+  taxRate?: number;
+  address?: string;
+  phone?: string;
   createdAt: Date;
 }
 
@@ -22,6 +26,10 @@ const boutiqueSchema = new Schema<IBoutique>(
       type: Number,
       default: 15,
     },
+    gstNumber: String,
+    taxRate: { type: Number, default: 0, min: 0, max: 100 },
+    address: String,
+    phone: String,
   },
   { timestamps: true }
 );

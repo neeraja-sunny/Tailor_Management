@@ -2,8 +2,12 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IUser extends Document {
   email: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
   fullName?: string;
+  businessName?: string;
+  country?: string;
   userPhoto?: string;
 
   role: "owner" | "staff";
@@ -16,15 +20,24 @@ export interface IUser extends Document {
   password?: string;
   otp?: string;
   otpExpires?: Date;
+  otpPurpose?: "login" | "signup" | "password-reset";
+  isEmailVerified: boolean;
+  termsAcceptedAt?: Date;
+  welcomeEmailSentAt?: Date;
+  deletedAt?: Date;
   isProfileCompleted: boolean;
   isActive: boolean; 
 }
 
 const userSchema = new Schema<IUser>(
   {
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    firstName: String,
+    lastName: String,
     phone: String,
     fullName: String,
+    businessName: String,
+    country: String,
     userPhoto: String,
 
     role: {
@@ -62,6 +75,15 @@ const userSchema = new Schema<IUser>(
 
     otp: String,
     otpExpires: Date,
+    otpPurpose: {
+      type: String,
+      enum: ["login", "signup", "password-reset"],
+    },
+
+    isEmailVerified: { type: Boolean, default: true },
+    termsAcceptedAt: Date,
+    welcomeEmailSentAt: Date,
+    deletedAt: Date,
 
     isProfileCompleted: { type: Boolean, default: false },
 
