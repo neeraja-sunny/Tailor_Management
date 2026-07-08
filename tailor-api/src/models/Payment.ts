@@ -1,16 +1,16 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IPayment extends Document {
-  boutique: mongoose.Schema.Types.ObjectId;
-  order?: mongoose.Schema.Types.ObjectId;
-  transaction?: mongoose.Schema.Types.ObjectId;
-  customer?: mongoose.Schema.Types.ObjectId;
+  boutique: mongoose.Types.ObjectId;
+  order?: mongoose.Types.ObjectId;
+  transaction?: mongoose.Types.ObjectId;
+  customer?: mongoose.Types.ObjectId;
   amount: number;
   date: Date;
   method: string;
   receiptUrl?: string;
   note?: string;
-  createdBy?: mongoose.Schema.Types.ObjectId;
+  createdBy?: mongoose.Types.ObjectId;
 }
 
 const paymentSchema = new Schema<IPayment>(

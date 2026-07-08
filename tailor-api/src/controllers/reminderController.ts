@@ -4,9 +4,10 @@ import notificationService from "../utils/notificationService";
 
 export const createReminder = async (req: Request, res: Response) => {
   try {
-    const { boutique, orderId, customerId, type, channel, sendAt, message } = req.body;
+    const { orderId, customerId, type, channel, sendAt, message } = req.body;
+    const boutique = (req as any).boutiqueId;
     if (!boutique || !sendAt || !message) return res.status(400).json({ message: "Missing fields" });
-    const reminder = await Reminder.create({ boutique, order: orderId, customer: customerId, type, channel, sendAt, message, createdBy: (req as any).user?._id });
+    const reminder = await Reminder.create({ boutique, order: orderId, customer: customerId, type, channel, sendAt, message, createdBy: (req as any).user?.userId });
     res.json({ message: "Reminder created", reminder });
   } catch (error) {
     console.error("createReminder error:", error);
@@ -14,9 +15,9 @@ export const createReminder = async (req: Request, res: Response) => {
   }
 };
 
-export const processDueReminders = async (_req: Request, res: Response) => {
+export const processDueReminders = async (req: Request, res: Response) => {
   try {
-    const due = await Reminder.find({ sent: false, sendAt: { $lte: new Date() } }).limit(200);
+    const due = await Reminder.find({ boutique: (req as any).boutiqueId, sent: false, sendAt: { $lte: new Date() } }).limit(200);
     const results: any[] = [];
     for (const r of due) {
       try {

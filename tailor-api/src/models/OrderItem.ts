@@ -105,6 +105,8 @@ export interface IOrderItem extends Document {
     deliveryDate?: Date,
 
     boutique?: mongoose.Schema.Types.ObjectId;
+
+    assignedStaff?: mongoose.Types.ObjectId;
    
 }
 

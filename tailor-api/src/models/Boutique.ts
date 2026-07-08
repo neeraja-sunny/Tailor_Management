@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IBoutique extends Document {
   name: string;
-  owner: mongoose.Schema.Types.ObjectId;
+  owner: mongoose.Types.ObjectId;
   tailorType?: "gents" | "ladies" | "both";
   shopPhoto?: string;
   dailyOrderLimit: number;
@@ -16,7 +16,7 @@ export interface IBoutique extends Document {
 const boutiqueSchema = new Schema<IBoutique>(
   {
     name: { type: String, required: true },
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
     tailorType: {
       type: String,
       enum: ["gents", "ladies", "both"],

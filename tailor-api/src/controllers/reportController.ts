@@ -2,15 +2,14 @@ import { Request, Response } from "express";
 import Transaction from "../models/Transaction";
 import Payment from "../models/Payment";
 
-function toCsv(rows: string[][]) {
+function toCsv(rows: unknown[][]) {
   return rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(",")).join("\n");
 }
 
 export const exportRevenueCsv = async (req: Request, res: Response) => {
   try {
-    const { start, end, boutiqueId } = req.query as any;
-    const filter: any = {};
-    if (boutiqueId) filter.boutique = boutiqueId;
+    const { start, end } = req.query as any;
+    const filter: any = { boutique: (req as any).boutiqueId };
     if (start || end) {
       filter.invoiceDate = {};
       if (start) filter.invoiceDate.$gte = new Date(start);
@@ -19,7 +18,7 @@ export const exportRevenueCsv = async (req: Request, res: Response) => {
 
     const txs = await Transaction.find(filter).populate("payments").limit(1000).lean();
 
-    const rows: string[][] = [["Invoice", "InvoiceDate", "Amount", "Advance", "Balance"]];
+    const rows: unknown[][] = [["Invoice", "InvoiceDate", "Amount", "Advance", "Balance"]];
     for (const t of txs) {
       rows.push([t.invoiceNumber, t.invoiceDate || "", t.amount || 0, t.advance || 0, t.balance || 0]);
     }
@@ -36,9 +35,8 @@ export const exportRevenueCsv = async (req: Request, res: Response) => {
 
 export const exportPaymentsCsv = async (req: Request, res: Response) => {
   try {
-    const { start, end, boutiqueId } = req.query as any;
-    const filter: any = {};
-    if (boutiqueId) filter.boutique = boutiqueId;
+    const { start, end } = req.query as any;
+    const filter: any = { boutique: (req as any).boutiqueId };
     if (start || end) {
       filter.date = {};
       if (start) filter.date.$gte = new Date(start);
@@ -46,7 +44,7 @@ export const exportPaymentsCsv = async (req: Request, res: Response) => {
     }
 
     const payments = await Payment.find(filter).limit(2000).lean();
-    const rows: string[][] = [["Date", "Amount", "Method", "Order", "Transaction", "Note"]];
+    const rows: unknown[][] = [["Date", "Amount", "Method", "Order", "Transaction", "Note"]];
     for (const p of payments) {
       rows.push([p.date || "", p.amount || 0, p.method || "", p.order || "", p.transaction || "", p.note || ""]);
     }

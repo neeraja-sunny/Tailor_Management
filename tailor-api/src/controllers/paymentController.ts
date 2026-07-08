@@ -4,28 +4,29 @@ import Transaction from "../models/Transaction";
 
 export const recordPayment = async (req: Request, res: Response) => {
   try {
-    const { boutique, orderId, transactionId, customerId, amount, method, receiptUrl, note } = req.body;
+    const { orderId, transactionId, customerId, amount, method, receiptUrl, note } = req.body;
+    const boutique = (req as any).boutiqueId;
 
-    if (!boutique || !amount || !method) return res.status(400).json({ message: "Missing fields" });
+    if (!boutique || !Number.isFinite(Number(amount)) || Number(amount) <= 0 || !method) return res.status(400).json({ message: "Valid amount and payment method are required" });
 
     const payment = await Payment.create({
       boutique,
       order: orderId,
       transaction: transactionId,
       customer: customerId,
-      amount,
+      amount: Number(amount),
       method,
       receiptUrl,
       note,
-      createdBy: (req as any).user?._id,
+      createdBy: (req as any).user?.userId,
     });
 
     if (transactionId) {
-      const tx = await Transaction.findById(transactionId);
+      const tx = await Transaction.findOne({ _id: transactionId, boutique });
       if (tx) {
         tx.payments = tx.payments || [];
         tx.payments.push(payment._id);
-        tx.advance = (tx.advance || 0) + amount;
+        tx.advance = (tx.advance || 0) + Number(amount);
         tx.balance = (tx.amount || 0) - (tx.advance || 0);
         await tx.save();
       }
@@ -40,9 +41,7 @@ export const recordPayment = async (req: Request, res: Response) => {
 
 export const getPayments = async (req: Request, res: Response) => {
   try {
-    const { boutiqueId } = req.query;
-    const filter: any = {};
-    if (boutiqueId) filter.boutique = boutiqueId;
+    const filter: any = { boutique: (req as any).boutiqueId };
     const payments = await Payment.find(filter).sort({ date: -1 }).limit(500);
     res.json({ payments });
   } catch (error) {

@@ -5,6 +5,8 @@ import Measurement from "../models/Measurement";
 import { generateOrderNumber } from "../utils/generateOrderNumber";
 import Boutique from "../models/Boutique";
 import { sendEmail } from "../utils/emailService";
+import Payment from "../models/Payment";
+import Transaction from "../models/Transaction";
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
@@ -109,6 +111,13 @@ for (const date of uniqueDeliveryDates) {
       notes,
       status: req.body.status || "active",
     });
+
+    const transaction = await Transaction.create({ boutique: boutiqueId, order: order._id, invoiceNumber: order.orderNumber, amount: totalAmount, advance: advanceGiven, balance: balanceDue, invoiceDate: new Date(), payments: [] });
+    if (Number(advanceGiven) > 0) {
+      const payment = await Payment.create({ boutique: boutiqueId, order: order._id, transaction: transaction._id, customer: customerId, amount: Number(advanceGiven), date: new Date(), method: req.body.paymentMethod || "cash", note: "Advance payment", createdBy: (req as any).user?.userId });
+      transaction.payments = [payment._id];
+      await transaction.save();
+    }
     
 
     return res.status(201).json({
@@ -222,7 +231,7 @@ export const receivePayment = async (req: Request, res: Response) => {
   try {
     const boutiqueId = (req as any).boutiqueId;
     const { id } = req.params;
-    const { amount } = req.body;
+    const { amount, method = "cash", note = "" } = req.body;
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ error: "Invalid amount" });
@@ -245,9 +254,19 @@ export const receivePayment = async (req: Request, res: Response) => {
 
     await order.save();
 
+    const transaction = await Transaction.findOneAndUpdate(
+      { boutique: boutiqueId, order: order._id },
+      { $setOnInsert: { boutique: boutiqueId, order: order._id, invoiceNumber: order.orderNumber, invoiceDate: order.createdAt }, $set: { amount: order.totalAmount, advance: order.advanceGiven, balance: order.balanceDue } },
+      { new: true, upsert: true }
+    );
+    const payment = await Payment.create({ boutique: boutiqueId, order: order._id, transaction: transaction._id, customer: order.customer, amount: Number(amount), date: new Date(), method, note, createdBy: (req as any).user?.userId });
+    transaction.payments = [...(transaction.payments || []), payment._id];
+    await transaction.save();
+
     return res.json({
       message: "Payment received successfully",
       order,
+      payment,
     });
   } catch (err) {
     console.error("RECEIVE PAYMENT ERROR:", err);

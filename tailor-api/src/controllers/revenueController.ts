@@ -89,7 +89,11 @@ export const getRevenueBreakdownByDate = async (
 ) => {
   try {
     const boutiqueId = (req as any).boutiqueId;
-    const { date } = req.params; // YYYY-MM-DD
+    const dateParam = req.params.date;
+    const date = Array.isArray(dateParam) ? dateParam[0] : dateParam;
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ message: "Date must use YYYY-MM-DD format" });
+    }
 
     const start = new Date(date);
     const end = new Date(date);
