@@ -29,20 +29,20 @@ const app = express()
 
 app.use(cookieParser());
 
-// app.use(
-//   cors({
-//     origin: [
-//       "http://localhost:3000",
-//       "http://127.0.0.1:3000",
-//       "http://localhost:3001",
-//       "https://tailor-pro-umber.vercel.app",
-//       "https://tailor-management-orcin.vercel.app/",
-//       // "https://tailor-axz18k1m6-aleeshamufthis-projects.vercel.app",
-//       /https:\/\/tailor-.*\.vercel\.app$/
-//     ],
-//     credentials: true
-//   })
-// );
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "http://localhost:3001",
+      "https://tailor-pro-umber.vercel.app",
+      "https://tailor-management-orcin.vercel.app/tailor",
+      // "https://tailor-axz18k1m6-aleeshamufthis-projects.vercel.app",
+      /https:\/\/tailor-.*\.vercel\.app$/
+    ],
+    credentials: true
+  })
+);
 
 // app.options("*", cors());
 
