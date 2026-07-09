@@ -43,7 +43,7 @@ const STAR = (
 
   return (
     <div className="relative min-h-screen overflow-hidden pt-16">
-      <Waves
+      {/* <Waves
         lineColor="#D3D3D3"
         backgroundColor="rgba(255,255,255,0.06)"
         waveSpeedX={0.02}
@@ -55,7 +55,7 @@ const STAR = (
         maxCursorMove={120}
         xGap={12}
         yGap={36}
-      />
+      /> */}
 
       {/* content above waves */}
       <div className="relative z-10 flex flex-col min-h-screen">

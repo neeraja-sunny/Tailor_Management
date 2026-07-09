@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import api from '@/lib/axios'
 import { setAccessToken } from '@/lib/axios'
 
@@ -33,10 +34,25 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const pathname = usePathname()
 
 
 useEffect(() => {
   const fetchUser = async () => {
+    const isProtectedScreen =
+      pathname?.startsWith("/tailor/dashboard") ||
+      pathname === "/tailor/profile" ||
+      pathname === "/complete-profile";
+
+    const hasSavedAccessToken =
+      typeof window !== "undefined" && Boolean(localStorage.getItem("accessToken"));
+
+    if (!isProtectedScreen && !hasSavedAccessToken) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
     const res = await api.get("/api/user/get-user", {
         withCredentials: true,
@@ -56,7 +72,7 @@ useEffect(() => {
     }
   };
   fetchUser();
-}, []);
+}, [pathname]);
 
 const logout = async () => {
     setAccessToken(null)
