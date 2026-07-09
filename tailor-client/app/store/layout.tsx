@@ -1,9 +1,8 @@
 import { ReactNode } from "react";
 
 export const metadata = {
-  title: 'Tailor Pro - Tailor Management',
-  description:
-    'Manage customers, orders, calendar and invoices for tailor boutiques.',
+  title: "Stitchr - Store Preview",
+  description: "Preview boutique collections, custom stitching, and local fashion discovery.",
 }
 
 export default function StoreLayout({ children }: { children: ReactNode }) {

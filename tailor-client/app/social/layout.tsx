@@ -1,9 +1,8 @@
 import { ReactNode } from "react";
 
 export const metadata = {
-  title: 'Tailor Pro - Tailor Management',
-  description:
-    'Manage Social Media for customers tailor boutiques.',
+  title: "Loomiz - Social Preview",
+  description: "Preview fashion discovery, reels, saved looks, and boutique inspiration.",
 }
 
 export default function SocialLayout({ children }: { children: ReactNode }) {

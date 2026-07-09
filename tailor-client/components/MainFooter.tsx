@@ -54,7 +54,7 @@ export default function MainFooter() {
             <ul className="space-y-3 text-gray-600 font-medium font-Poppins">
               <li><Link href="/tailor" className="hover:text-[#046C4E] transition">Tailor Pro</Link></li>
               <li><Link href="/store" className="hover:text-[#046C4E] transition">Store</Link></li>
-              <li><Link href="/socialmedia" className="hover:text-[#046C4E] transition">Social</Link></li>
+              <li><Link href="/social" className="hover:text-[#046C4E] transition">Social</Link></li>
             </ul>
           </div>
 

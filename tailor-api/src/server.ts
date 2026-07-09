@@ -23,7 +23,6 @@ import reportRoutes from './routes/reportRoutes'
 import reminderRoutes from './routes/reminderRoutes'
 
 dotenv.config()
-connectDB();
 
 const app = express()
 
@@ -36,7 +35,7 @@ app.use(
       "http://127.0.0.1:3000",
       "http://localhost:3001",
       "https://tailor-pro-umber.vercel.app",
-      "https://tailor-management-orcin.vercel.app/tailor",
+      "https://tailor-management-orcin.vercel.app",
       // "https://tailor-axz18k1m6-aleeshamufthis-projects.vercel.app",
       /https:\/\/tailor-.*\.vercel\.app$/
     ],
@@ -72,6 +71,13 @@ app.use("/api/token", refreshRoute);
 app.use("/api/protected", protectedRoutes);
 
 const port = process.env.PORT || 4000
-app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`)
-})
+
+const startServer = async () => {
+  await connectDB();
+
+  app.listen(port, () => {
+    console.log(`Server listening on http://localhost:${port}`)
+  })
+}
+
+startServer();

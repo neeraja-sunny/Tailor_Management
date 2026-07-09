@@ -5,9 +5,6 @@ import { generateAccessToken } from "../utils/token";
 
 const router = express.Router();
 
-console.log("✅ Refresh API hit");
-
-
 router.post("/refresh", (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
@@ -22,7 +19,12 @@ router.post("/refresh", (req, res) => {
     const accessToken = generateAccessToken(payload);
     return res.json({ accessToken });
   } catch (err) {
-    return res.status(403).json({ message: "Invalid refresh token" });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
+    return res.status(401).json({ message: "Invalid refresh token" });
   }
 });
 
