@@ -36,6 +36,7 @@ app.use(
       "http://localhost:3001",
       "https://tailor-pro-umber.vercel.app",
       "https://tailor-management-orcin.vercel.app",
+      "tailor-management-o137wauo2-neerajas-projects-2b3ee064.vercel.app",
       // "https://tailor-axz18k1m6-aleeshamufthis-projects.vercel.app",
       /https:\/\/tailor-.*\.vercel\.app$/
     ],
