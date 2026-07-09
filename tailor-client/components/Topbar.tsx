@@ -38,7 +38,7 @@ export default function Topbar() {
         </button>
 
         <div
-          className={`absolute right-0 mt-2 w-44 bg-white rounded-md shadow-lg text-black border z-50 ${
+          className={`absolute right-0 mt-2 w-44 bg-white rounded-md shadow-lg text-black border z-[999] ${
             open ? "block" : "hidden"
           }`}
         >

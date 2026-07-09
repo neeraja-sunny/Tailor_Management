@@ -109,7 +109,7 @@ useEffect(() => setMounted(true), []);
               </button>
 
               <div
-                className={`absolute right-0 mt-2 w-40 bg-white z-[999] rounded-md text-black shadow ${
+                className={`absolute right-0 mt-2 w-40 bg-white z-[9999] rounded-md text-black shadow ${
                   open ? 'block' : 'hidden'
                 }`}
               >
