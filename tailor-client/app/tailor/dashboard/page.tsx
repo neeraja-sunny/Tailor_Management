@@ -98,11 +98,15 @@ export default function Dashboard() {
       api.get("/api/enquiries"),
     ])
       .then(([ordersResponse, customersResponse, enquiriesResponse]) => {
-        if (!active) return;
-        setOrders(ordersResponse.data.orders || []);
-        setCustomers(customersResponse.data || []);
-        setEnquiries(enquiriesResponse.data.enquiries || []);
-      })
+  if (!active) return;
+  setOrders(ordersResponse.data.orders || []);
+  setCustomers(
+    Array.isArray(customersResponse.data)
+      ? customersResponse.data
+      : customersResponse.data.customers || []
+  );
+  setEnquiries(enquiriesResponse.data.enquiries || []);
+})
       .catch(() => {
         if (active) setError("Unable to load dashboard data.");
       })
@@ -124,8 +128,12 @@ export default function Dashboard() {
   };
   const periodOrders = orders.filter((order) => inRange(order.createdAt, periodStart, periodEnd));
   const previousOrders = orders.filter((order) => inRange(order.createdAt, previousStart, previousEnd));
-  const periodCustomers = customers.filter((customer) => inRange(customer.createdAt, periodStart, periodEnd));
-  const previousCustomers = customers.filter((customer) => inRange(customer.createdAt, previousStart, previousEnd));
+  const periodCustomers = (Array.isArray(customers) ? customers : []).filter((customer) =>
+  inRange(customer.createdAt, periodStart, periodEnd)
+);
+const previousCustomers = (Array.isArray(customers) ? customers : []).filter((customer) =>
+  inRange(customer.createdAt, previousStart, previousEnd)
+);
   const periodEnquiries = enquiries.filter((enquiry) => inRange(enquiry.createdAt, periodStart, periodEnd));
   const previousEnquiries = enquiries.filter((enquiry) => inRange(enquiry.createdAt, previousStart, previousEnd));
 
