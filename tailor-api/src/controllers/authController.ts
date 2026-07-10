@@ -176,12 +176,16 @@ export const verifyOtp = async (req: Request, res: Response) => {
   try {
     const email = normalizeEmail(req.body.email);
     const otp = req.body.otp?.toString().trim();
+    const requestedPurpose = req.body.purpose?.toString();
     if (!email || !otp) return res.status(400).json({ message: "Email and OTP required" });
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
     if (user.otpPurpose === "password-reset") return res.status(400).json({ message: "Use this code on the reset-password form" });
 
     const purpose = user.otpPurpose === "signup" ? "signup" : "login";
+    if (requestedPurpose && requestedPurpose !== purpose) {
+      return res.status(400).json({ message: "Request a new verification code" });
+    }
     const otpError = validateOtp(user, otp, purpose);
     if (otpError) return res.status(400).json({ message: otpError });
 

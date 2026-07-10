@@ -11,6 +11,7 @@ export default function OtpClient() {
   const { setUser } = useAuth();
  
   const [email, setEmail] = useState("");
+  const [purpose, setPurpose] = useState<"login" | "signup">("login");
 
   const [otp, setOtp] = useState(Array(6).fill(""));
   const [timer, setTimer] = useState(60);
@@ -20,7 +21,9 @@ export default function OtpClient() {
   useEffect(() => {
   
   const e = searchParams?.get("email");
-    if (e) setEmail(e);
+  const p = searchParams?.get("purpose");
+    if (e) setEmail(e.trim().toLowerCase());
+    if (p === "signup") setPurpose("signup");
   }, []);
 
   useEffect(() => {
@@ -55,7 +58,7 @@ export default function OtpClient() {
     try {
       const res = await api.post(
         "/api/auth/verify-otp",
-        { email, otp: finalOtp },
+        { email: email.trim().toLowerCase(), otp: finalOtp, purpose },
       );
 
       if (res.data.accountCreated) {
@@ -84,7 +87,7 @@ export default function OtpClient() {
   const resendOtp = async () => {
     setLoading(true);
     try {
-    await api.post("/api/auth/resend-otp", { email });
+    await api.post("/api/auth/resend-otp", { email: email.trim().toLowerCase(), purpose });
     alert("A new OTP has been sent to your email.");
     setTimer(60);
     } catch (err: any) {
