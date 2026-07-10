@@ -1,5 +1,3 @@
-import nodemailer from "nodemailer";
-
 export type EmailContent = {
   text: string;
   html?: string;
@@ -10,93 +8,61 @@ export type EmailContent = {
   }>;
 };
 
-let transporter: ReturnType<typeof nodemailer.createTransport> | undefined;
-
-const getTransporter = () => {
-  if (!transporter) {
-    console.log("========== EMAIL DEBUG ==========");
-    console.log({
-      EMAIL_USER: process.env.EMAIL_USER,
-      EMAIL_PASS_EXISTS: !!process.env.EMAIL_PASS,
-      EMAIL_PASS_LENGTH: process.env.EMAIL_PASS?.length,
-      NODE_ENV: process.env.NODE_ENV,
-    });
-    console.log("===============================");
-
-    transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  family: 4,
-  logger: true,
-  debug: true,
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
-  auth: {
-    user: process.env.EMAIL_USER!,
-    pass: process.env.EMAIL_PASS!,
-  },
-});
-  }
-
-  return transporter;
-};
-
 export const sendEmail = async (
   to: string,
   subject: string,
-  content: string | EmailContent,
+  content: string | EmailContent
 ) => {
-  try {
-    console.log("\n========== SEND EMAIL ==========");
-    console.log({
-      to,
-      subject,
-      time: new Date().toISOString(),
-    });
+  const message =
+    typeof content === "string"
+      ? { text: content }
+      : content;
 
-    const message = typeof content === "string" ? { text: content } : content;
+  const body: any = {
+    sender: {
+      name: "TailorPro",
+      email: process.env.EMAIL_FROM!,
+    },
+    to: [
+      {
+        email: to,
+      },
+    ],
+    subject,
+  };
 
-    const transporter = getTransporter();
-
-    console.log("Verifying SMTP connection...");
-
-    await transporter.verify();
-
-    console.log("✅ SMTP verification successful");
-
-    console.log("Sending email...");
-
-    const smtp = getTransporter();
-
-console.log("Verifying SMTP...");
-await smtp.verify();
-console.log("SMTP verified.");
-
-const info = await smtp.sendMail({
-  from: `TailorPro <${process.env.EMAIL_USER}>`,
-  to,
-  subject,
-  ...message,
-});
-
-    console.log("✅ Email sent successfully");
-    console.log(info);
-
-    return info;
-  } catch (err) {
-    console.error("❌ EMAIL ERROR");
-    console.error(err);
-
-    if (err instanceof Error) {
-      console.error("Message:", err.message);
-      console.error("Stack:", err.stack);
-    }
-
-    console.error("Full error object:");
-    console.dir(err, { depth: null });
-
-    throw err;
+  if (message.text) {
+    body.textContent = message.text;
   }
-};
+
+  if (message.html) {
+    body.htmlContent = message.html;
+  }
+
+  if (message.attachments?.length) {
+    body.attachment = message.attachments.map((a) => ({
+      name: a.filename,
+      content: a.content.toString("base64"),
+    }));
+  }
+
+  const response = await fetch(
+    "https://api.brevo.com/v3/smtp/email",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY!,
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error("Brevo Error:", error);
+    throw new Error(error);
+  }
+
+  console.log("Email sent successfully");
+}
