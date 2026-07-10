@@ -25,9 +25,9 @@ useEffect(() => setMounted(true), []);
   return (
     <header
       className={clsx(
-        'no-print bg-transparent backdrop-blur left-0 w-full z-50 transition-all duration-300',
+        'no-print relative z-[1000] bg-transparent backdrop-blur left-0 w-full transition-all duration-300',
         isLoggedIn
-          ? 'no-print bg-white shadow-sm backdrop-blur top-0 left-0 w-full z-50'
+          ? 'no-print bg-white shadow-sm backdrop-blur top-0 left-0 w-full'
           : 'no-print bg-transparent backdrop-blur top-2 md:top-3 lg:top-5'
       )}
     >
@@ -87,7 +87,7 @@ useEffect(() => setMounted(true), []);
               </span>
             </Link>
           ) : (
-            <div className="relative">
+            <div className="relative z-[1001]">
               <button
                 onClick={() => setOpen(!open)}
                 className="  flex text-lg items-center gap-3 
@@ -109,7 +109,7 @@ useEffect(() => setMounted(true), []);
               </button>
 
               <div
-                className={`absolute right-0 mt-2 w-40 bg-white z-[9999] rounded-md text-black shadow ${
+                className={`absolute right-0 mt-2 w-40 z-[1002] bg-white rounded-md text-black shadow ${
                   open ? 'block' : 'hidden'
                 }`}
               >

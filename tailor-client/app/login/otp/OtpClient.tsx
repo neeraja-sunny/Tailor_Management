@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import api, { setAccessToken } from "@/lib/axios";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function OtpClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { setUser } = useAuth();
  
   const [email, setEmail] = useState("");
 
@@ -61,7 +63,8 @@ export default function OtpClient() {
         return;
       }
 
-      setAccessToken(res.data.accessToken)
+      setAccessToken(res.data.accessToken);
+      setUser(res.data.user);
 
       if (!res.data.user.isProfileCompleted && res.data.user.role === "owner") {
 

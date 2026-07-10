@@ -1,24 +1,19 @@
 import Order from "../models/Order";
 import { Request, Response } from "express";
+import { getRevenueDateRange } from "../utils/revenueDateRange";
 
 export const getRevenueSummary = async (req: Request, res: Response) => {
   try {
     const boutiqueId = (req as any).boutiqueId;
-    const { year, month } = req.query;
+    const { period, selectedValue, start, end } = getRevenueDateRange(req.query.period, req.query);
 
     const match: any = {
       boutique: boutiqueId,
       status: { $ne: "cancelled" },
       isArchived: false,
       advanceGiven: { $gt: 0 },
+      updatedAt: { $gte: start, $lt: end },
     };
-
-    if (year && month) {
-      const monthIndex = Number(month) - 1;
-      const start = new Date(Number(year), monthIndex, 1);
-      const end = new Date(Number(year), monthIndex + 1, 1);
-      match.updatedAt = { $gte: start, $lt: end };
-    }
 
     const result = await Order.aggregate([
       { $match: match },
@@ -26,12 +21,18 @@ export const getRevenueSummary = async (req: Request, res: Response) => {
         $group: {
           _id: null,
           totalRevenue: { $sum: "$advanceGiven" },
+          orderCount: { $sum: 1 },
         },
       },
     ]);
 
     res.json({
       totalRevenue: result[0]?.totalRevenue || 0,
+      orderCount: result[0]?.orderCount || 0,
+      period,
+      selectedValue,
+      startDate: start,
+      endDate: end,
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch revenue data" });
@@ -42,21 +43,15 @@ export const getRevenueSummary = async (req: Request, res: Response) => {
 export const getDailyRevenue = async (req: Request, res: Response) => {
   try {
     const boutiqueId = (req as any).boutiqueId;
-    const { year, month } = req.query;
+    const { start, end } = getRevenueDateRange(req.query.period, req.query);
 
     const match: any = {
       boutique: boutiqueId,
       status: { $ne: "cancelled" },
       isArchived: false,
       advanceGiven: { $gt: 0 },
+      updatedAt: { $gte: start, $lt: end },
     };
-
-    if (year && month) {
-      const monthIndex = Number(month) - 1;
-      const start = new Date(Number(year), monthIndex, 1);
-      const end = new Date(Number(year), monthIndex + 1, 1);
-      match.updatedAt = { $gte: start, $lt: end };
-    }
 
     const revenue = await Order.aggregate([
       { $match: match },

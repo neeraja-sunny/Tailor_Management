@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import api from "@/lib/axios";
-import { BadgeCheck, CircleDollarSign, CircleX, Trash2, TriangleAlert, WalletCards, X } from "lucide-react";
+import { BadgeCheck, CircleDollarSign, CircleX, Search, Trash2, TriangleAlert, WalletCards, X } from "lucide-react";
 
 const allowedFilters = new Set([
   "all", "active", "pending", "draft", "past_due", "upcoming", "pending_payment",
@@ -14,6 +14,7 @@ const allowedFilters = new Set([
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [filter, setFilter] = useState("active");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const [deleteOrderId, setDeleteOrderId] = useState<string | null>(null);
@@ -23,8 +24,12 @@ export default function OrdersPage() {
 
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    const timeout = window.setTimeout(() => {
+      fetchOrders(search);
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [search]);
 
   useEffect(() => {
     const nextFilter = new URLSearchParams(window.location.search).get("filter");
@@ -111,10 +116,12 @@ const hasUpcomingItem = (order: any, today: Date) =>
   getItemDates(order).some((d: any) => d > today);
 
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (query = search) => {
     try {
       setLoading(true);
-      const res = await api.get("/api/orders/all");
+      const res = await api.get("/api/orders/all", {
+        params: { q: query || undefined, limit: query ? 200 : 50 },
+      });
       setOrders(res.data.orders || []);
     } catch (err) {
       console.error("Failed to fetch orders:", err);
@@ -182,6 +189,17 @@ const hasUpcomingItem = (order: any, today: Date) =>
           Create New Order
         </Link>
       </div>
+
+      <label className="relative block max-w-xl">
+        <Search size={18} className="pointer-events-none absolute left-3 top-3.5 text-gray-400" />
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search order number or customer name"
+          className="h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+        />
+      </label>
 
       <section className="grid grid-cols-2 border border-gray-200 bg-white lg:grid-cols-4">
         {paymentFilters.map(({ key, label, icon: Icon, tone }) => (

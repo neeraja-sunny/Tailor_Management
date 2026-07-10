@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Order from "../models/Order";
+import Customer from "../models/Customer";
 import OrderItem from "../models/OrderItem";
 import Measurement from "../models/Measurement";
 import { generateOrderNumber } from "../utils/generateOrderNumber";
@@ -7,6 +8,8 @@ import Boutique from "../models/Boutique";
 import { sendEmail } from "../utils/emailService";
 import Payment from "../models/Payment";
 import Transaction from "../models/Transaction";
+
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
@@ -143,8 +146,23 @@ export const getAllOrders = async (req: Request, res: Response) => {
     }
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const search = typeof req.query.q === "string" ? req.query.q.trim() : "";
 
-    const filter = { boutique: boutiqueId, isArchived: false };
+    const filter: any = { boutique: boutiqueId, isArchived: false };
+
+    if (search) {
+      const regex = new RegExp(escapeRegex(search), "i");
+      const matchingCustomers = await Customer.find({
+        boutique: boutiqueId,
+        name: regex,
+      }).select("_id");
+
+      filter.$or = [
+        { orderNumber: regex },
+        { customer: { $in: matchingCustomers.map((customer) => customer._id) } },
+      ];
+    }
+
     const total = await Order.countDocuments(filter);
 
     const orders = await Order.find(filter)

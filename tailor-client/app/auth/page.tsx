@@ -77,15 +77,19 @@ export default function AuthPage() {
   };
 
   const handleOtpLogin = async () => {
-    if (!identifier.includes("@")) {
+    const email = identifier.trim().toLowerCase();
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!isEmail) {
       setError("Enter your email address to use email OTP.");
       return;
     }
+
     setLoading(true);
     setError("");
     try {
-      await api.post("/api/auth/send-otp", { email: identifier });
-      router.push(`/login/otp?email=${encodeURIComponent(identifier)}`);
+      await api.post("/api/auth/send-otp", { email });
+      router.push(`/login/otp?email=${encodeURIComponent(email)}&purpose=login`);
     } catch (requestError: any) {
       setError(requestError.response?.data?.message || "Unable to send OTP");
     } finally {
