@@ -12,11 +12,22 @@ export type EmailContent = {
 
 let transporter: ReturnType<typeof nodemailer.createTransport> | undefined;
 
+
+
 const getTransporter = () => {
+
+  
   if (!transporter) {
+    console.log({
+  EMAIL_USER: process.env.EMAIL_USER,
+  EMAIL_PASS_EXISTS: !!process.env.EMAIL_PASS,
+    EMAIL_PASS_LENGTH: process.env.EMAIL_PASS?.length,
+});
+
     transporter = nodemailer.createTransport({
+      
       host: "smtp.gmail.com",
-      port: 464,
+      port: 465,
       secure: true,
       auth: {
         user: process.env.EMAIL_USER!,
@@ -28,7 +39,11 @@ const getTransporter = () => {
   return transporter;
 };
 
+
+
 export const sendEmail = async (
+
+  
   to: string,
   subject: string,
   content: string | EmailContent,
