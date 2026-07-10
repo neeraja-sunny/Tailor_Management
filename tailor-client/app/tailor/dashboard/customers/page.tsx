@@ -5,7 +5,7 @@ import api from "@/lib/axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AddCustomerModal from "@/components/customers/AddCustomerModal";
-import { Search, User2 } from "lucide-react";
+import { Search } from "lucide-react";
 
 export default function SelectCustomerPage() {
   const router = useRouter();
@@ -19,9 +19,15 @@ export default function SelectCustomerPage() {
   const fetchCustomers = async () => {
     try {
       const res = await api.get("/api/customers");
-      setCustomers(res.data);
+      const nextCustomers = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.customers)
+          ? res.data.customers
+          : [];
+      setCustomers(nextCustomers);
     } catch (err) {
       console.error("Error fetching customers", err);
+      setCustomers([]);
     } finally {
       setLoading(false);
     }
@@ -39,7 +45,6 @@ export default function SelectCustomerPage() {
     );
   };
 
-  console.log("Customers data:", customers);
   const normalizedSearch = search.trim().toLowerCase();
   const filteredCustomers = customers.filter((customer) =>
     [customer.name, customer.phone, customer.city, customer.state]

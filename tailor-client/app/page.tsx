@@ -172,7 +172,7 @@ useEffect(() => {
     className: "top-[0%] right-[0%] w-[100rem] z-[-10] opacity-10"
   },
           {
-            src: "/images/thread.png",
+            src: "/images/Thread.png",
             speed: 0.1,
             className: `
       top-[99%]
@@ -189,7 +189,7 @@ useEffect(() => {
       `
           },
           {
-            src: "/images/scissors.png",
+            src: "/images/Scissors.png",
             speed: 0.6,
             className: `
       top-[100%]
