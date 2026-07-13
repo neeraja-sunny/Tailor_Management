@@ -166,13 +166,13 @@ useEffect(() => {
         parallaxImages={[
 
                       {
-    src: "/images/bgg white.png",
+    src: "/images/bgg white.webp",
     speed: 0.02,
     layer: "back",
     className: "top-[0%] right-[0%] w-[100rem] z-[-10] opacity-10"
   },
           {
-            src: "/images/Thread.png",
+            src: "/images/Thread.webp",
             speed: 0.1,
             className: `
       top-[99%]
@@ -189,7 +189,7 @@ useEffect(() => {
       `
           },
           {
-            src: "/images/Scissors.png",
+            src: "/images/Scissors.webp",
             speed: 0.6,
             className: `
       top-[100%]
@@ -204,7 +204,7 @@ useEffect(() => {
       `,
           },
           {
-            src: "/images/Ruler.png",
+            src: "/images/Ruler.webp",
             speed: 0.6,
             className: `
       top-[150%]
@@ -242,7 +242,7 @@ useEffect(() => {
 
 
                       {
-    src: "/images/bgg white.png",
+    src: "/images/bgg white.webp",
     speed: 0.02,
     layer: "back",
     className: "top-[0%] right-[0%] w-[100rem] z-[-10] opacity-60"
@@ -252,7 +252,7 @@ useEffect(() => {
 
           
           {
-            src: "/images/shopping bag.png",
+            src: "/images/shopping bag.webp",
             speed: 0.1,
             className: `
       top-[120%]
@@ -269,7 +269,7 @@ useEffect(() => {
       `
           },
           {
-            src: "/images/cart.png",
+            src: "/images/cart.webp",
             speed: 0.3,
             className: `
       top-[170%]
@@ -286,7 +286,7 @@ useEffect(() => {
       `,
           },
           {
-            src: "/images/sale.png",
+            src: "/images/sale.webp",
             speed: 0.4,
             className: `
       top-[200%]
@@ -326,14 +326,14 @@ useEffect(() => {
         parallaxImages={[
 
             {
-    src: "/images/bgg white.png",
+    src: "/images/bgg white.webp",
     speed: 0.02,
     layer: "back",
     className: "top-[0%] right-[0%] w-[100rem] z-[-10] opacity-10"
   },
 
           {
-            src: "/images/like2.png",
+            src: "/images/like2.webp",
             speed: 0.1,
             className: `
       top-[160%]
@@ -350,7 +350,7 @@ useEffect(() => {
       `
           },
           {
-            src: "/images/comment.png",
+            src: "/images/comment.webp",
             speed: 0.2,
             className: `
       top-[190%]
@@ -367,7 +367,7 @@ useEffect(() => {
       `,
           },
           {
-            src: "/images/hashtag.png",
+            src: "/images/hashtag.webp",
             speed: 0.3,
             className: `
       top-[270%]
