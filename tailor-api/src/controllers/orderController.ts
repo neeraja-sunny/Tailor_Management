@@ -8,6 +8,7 @@ import Boutique from "../models/Boutique";
 import { sendEmail } from "../utils/emailService";
 import Payment from "../models/Payment";
 import Transaction from "../models/Transaction";
+import User from "../models/User";
 
 const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -230,10 +231,7 @@ export const getOrderById = async (req: Request, res: Response) => {
       .populate("customer")
       .populate({
     path: "items",
-    populate: {
-      path: "measurements",
-      model: "Measurement",
-    },
+    populate: { path: "workAssignments.staff", select: "fullName email staffSkills" },
   });
 
     if (!order) {
@@ -502,6 +500,37 @@ export const updateOutfitDetails = async (req: Request, res: Response) => {
     return res.json({ message: "Outfit details updated", item, order });
   } catch (err: any) {
     return res.status(500).json({ message: err.message });
+  }
+};
+
+export const assignOutfitWork = async (req: Request, res: Response) => {
+  try {
+    const boutiqueId = (req as any).boutiqueId;
+    const { itemId } = req.params;
+    const workType = String(req.body.workType || "").trim().toLowerCase();
+    const staffId = String(req.body.staffId || "").trim();
+    if (!workType) return res.status(400).json({ message: "Work type is required" });
+
+    const item = await OrderItem.findOne({ _id: itemId, boutique: boutiqueId });
+    if (!item) return res.status(404).json({ message: "Order item not found" });
+
+    if (!staffId) {
+      item.workAssignments = (item.workAssignments || []).filter((entry: any) => entry.workType !== workType) as any;
+      await item.save();
+      return res.json({ message: "Work assignment removed", item: await item.populate("workAssignments.staff", "fullName email staffSkills") });
+    }
+
+    const staff = await User.findOne({ _id: staffId, role: "staff", boutique: boutiqueId, isActive: true });
+    if (!staff) return res.status(404).json({ message: "Active staff member not found" });
+
+    const assignments = (item.workAssignments || []).filter((entry: any) => entry.workType !== workType);
+    assignments.push({ workType, staff: staff._id, assignedAt: new Date() } as any);
+    item.workAssignments = assignments as any;
+    item.assignedStaff = staff._id as any;
+    await item.save();
+    return res.json({ message: `${workType} assigned successfully`, item: await item.populate("workAssignments.staff", "fullName email staffSkills") });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message || "Failed to assign work" });
   }
 };
 

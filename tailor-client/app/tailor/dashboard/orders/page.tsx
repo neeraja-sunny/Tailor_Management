@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import api from "@/lib/axios";
-import { BadgeCheck, CircleDollarSign, CircleX, Search, Trash2, TriangleAlert, WalletCards, X } from "lucide-react";
+import { BadgeCheck, CircleDollarSign, CircleX, LayoutGrid, List, Search, Trash2, TriangleAlert, UsersRound, WalletCards, X } from "lucide-react";
 
 const allowedFilters = new Set([
   "all", "active", "pending", "draft", "past_due", "upcoming", "pending_payment",
@@ -16,6 +16,7 @@ export default function OrdersPage() {
   const [filter, setFilter] = useState("active");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<"table" | "cards">("table");
 
   const [deleteOrderId, setDeleteOrderId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -231,7 +232,11 @@ const hasUpcomingItem = (order: any, today: Date) =>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+      <div className="flex items-center justify-between"><p className="text-sm font-semibold text-gray-500">{filteredOrders.length} orders</p><div className="flex border border-gray-300 bg-white p-1"><button onClick={() => setView("table")} className={`grid h-9 w-10 place-items-center ${view === "table" ? "bg-emerald-700 text-white" : "text-gray-500"}`} aria-label="Table view"><List size={18} /></button><button onClick={() => setView("cards")} className={`grid h-9 w-10 place-items-center ${view === "cards" ? "bg-emerald-700 text-white" : "text-gray-500"}`} aria-label="Card view"><LayoutGrid size={18} /></button></div></div>
+
+      {view === "table" && !loading && <div className="overflow-x-auto border border-gray-200 bg-white"><table className="min-w-[950px] w-full text-left text-sm"><thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500"><tr><th className="px-4 py-3">Order</th><th className="px-4 py-3">Customer</th><th className="px-4 py-3">Outfits</th><th className="px-4 py-3">Total</th><th className="px-4 py-3">Paid</th><th className="px-4 py-3">Balance</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Actions</th></tr></thead><tbody className="divide-y divide-gray-100">{filteredOrders.map((order) => <tr key={order._id} className="hover:bg-gray-50"><td className="px-4 py-4 font-bold text-gray-900">#{order.orderNumber}</td><td className="px-4 py-4 font-medium">{order.customer?.name || "—"}</td><td className="px-4 py-4">{order.items?.length || 0}</td><td className="px-4 py-4">₹{order.totalAmount || 0}</td><td className="px-4 py-4 text-emerald-700">₹{order.advanceGiven || 0}</td><td className="px-4 py-4 font-semibold text-amber-700">₹{order.balanceDue || 0}</td><td className="px-4 py-4"><span className={`px-2 py-1 text-xs font-semibold capitalize ${statusBadge[order.status] || "bg-gray-100 text-gray-700"}`}>{order.status?.replace("_", " ")}</span></td><td className="px-4 py-4"><div className="flex justify-end gap-2"><Link href={`/tailor/dashboard/orders/${order._id}`} className="border border-gray-300 px-3 py-2 font-semibold text-gray-700">View</Link><Link href={`/tailor/dashboard/orders/${order._id}#assign-work`} className="inline-flex items-center gap-1.5 bg-emerald-700 px-3 py-2 font-semibold text-white"><UsersRound size={15} />Assign staff</Link></div></td></tr>)}</tbody></table></div>}
+
+      {view === "cards" && <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
 
         {loading && <p className="text-gray-500">Loading orders...</p>}
 
@@ -291,6 +296,8 @@ const hasUpcomingItem = (order: any, today: Date) =>
                   View Order Details
                 </Link>
 
+                <Link href={`/tailor/dashboard/orders/${order._id}#assign-work`} className="flex w-full items-center justify-center gap-2 border border-emerald-700 py-2 text-sm font-semibold text-emerald-700"><UsersRound size={16} />Assign Staff</Link>
+
                 <Link
                   href={`/tailor/dashboard/orders/${order._id}/item/${order.items?.[0]?._id}`}
                   className="w-full text-center py-2 rounded-full border border-emerald-600 text-emerald-600 text-sm font-medium hover:bg-emerald-50"
@@ -315,7 +322,7 @@ const hasUpcomingItem = (order: any, today: Date) =>
         {!loading && filteredOrders.length === 0 && (
           <p className="text-gray-600 font-semibold">No orders found.</p>
         )}
-      </div>
+      </div>}
 
       {deleteOrderId && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">

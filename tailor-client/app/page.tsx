@@ -169,7 +169,7 @@ useEffect(() => {
     src: "/images/bgg white.webp",
     speed: 0.02,
     layer: "back",
-    className: "top-[0%] right-[0%] w-[100rem] z-[-10] opacity-10"
+    className: "-top-[15vh] -bottom-[15vh] -left-[15vw] -right-[15vw] z-[-10] opacity-10"
   },
           {
             src: "/images/Thread.webp",
@@ -245,7 +245,7 @@ useEffect(() => {
     src: "/images/bgg white.webp",
     speed: 0.02,
     layer: "back",
-    className: "top-[0%] right-[0%] w-[100rem] z-[-10] opacity-60"
+    className: "-top-[15vh] -bottom-[15vh] -left-[15vw] -right-[15vw] z-[-10] opacity-60"
   },
 
 
@@ -329,7 +329,7 @@ useEffect(() => {
     src: "/images/bgg white.webp",
     speed: 0.02,
     layer: "back",
-    className: "top-[0%] right-[0%] w-[100rem] z-[-10] opacity-10"
+    className: "-top-[15vh] -bottom-[15vh] -left-[15vw] -right-[15vw] z-[-10] opacity-10"
   },
 
           {

@@ -149,13 +149,13 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-gray-50 px-4 py-10 sm:px-6">
-      <div className="mx-auto grid w-full max-w-5xl overflow-hidden border border-gray-200 bg-white shadow-sm lg:grid-cols-[0.9fr_1.1fr]">
+    <div className=" h-[100vh] flex items-center bg-gray-50 px-4 py-10 sm:px-6">
+      <div className="mx-auto grid h-[680px] w-full max-w-5xl overflow-hidden border border-gray-200 bg-white shadow-sm lg:grid-cols-[0.9fr_1.1fr]">
         <section
-          className="relative hidden min-h-[680px] bg-cover bg-center p-10 text-white lg:flex lg:flex-col lg:justify-between"
+          className="relative hidden h-full bg-cover bg-center p-10 text-white lg:flex lg:flex-col lg:justify-between"
           style={{ backgroundImage: "url('/landing/auth.jpg')" }}
         >
-          <div className="absolute inset-0 bg-emerald-950/75" />
+          <div className="absolute inset-0 bg-black/55" />
           <div className="relative text-2xl font-bold">TailorPro</div>
           <div className="relative max-w-sm">
             <h1 className="text-4xl font-semibold leading-tight">Run your tailoring business with clarity.</h1>
@@ -165,7 +165,9 @@ export default function AuthPage() {
           </div>
         </section>
 
-        <section className="p-6 sm:p-10 lg:p-12">
+        <section
+          className={`h-full p-6 sm:p-10 lg:p-12 ${mode === "signup" ? "overflow-y-auto" : "overflow-hidden"}`}
+        >
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-gray-600 transition hover:text-emerald-700"

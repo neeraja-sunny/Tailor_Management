@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { createOrder, getAllOrders, updateOrderStatus, getOrderById, updateOutfitStatus, updateOutfitDetails, receivePayment, addExtraCharge, applyOrderDiscount, getOrdersCountByDate, deleteOrder, sendInvoiceEmail } from "../controllers/orderController";
+import { createOrder, getAllOrders, updateOrderStatus, getOrderById, updateOutfitStatus, updateOutfitDetails, assignOutfitWork, receivePayment, addExtraCharge, applyOrderDiscount, getOrdersCountByDate, deleteOrder, sendInvoiceEmail } from "../controllers/orderController";
 import { requireBoutique } from "../middleware/boutiqueMiddleware";
 import { authMiddleware } from "../middleware/authMiddleware";
 
@@ -37,6 +37,7 @@ router.patch("/:id/discount", authMiddleware, requireBoutique, applyOrderDiscoun
 router.post("/:id/send-invoice", authMiddleware, requireBoutique, invoiceUpload.single("invoice"), sendInvoiceEmail);
 
 router.patch("/item/:itemId/status", authMiddleware, requireBoutique, updateOutfitStatus);
+router.patch("/item/:itemId/assign-work", authMiddleware, requireBoutique, assignOutfitWork);
 router.patch("/item/:itemId", authMiddleware, requireBoutique, updateOutfitDetails);
 
 export default router

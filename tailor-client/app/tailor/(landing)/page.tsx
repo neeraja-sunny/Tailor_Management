@@ -1,602 +1,499 @@
 "use client";
 
 import Link from "next/link";
-import Waves from "@/components/Waves";
-import Image from "next/image";
-import Testimonials from "@/components/Testimonials";
+import { useEffect, useRef, useState } from "react";
+import WebpImage from "@/components/WebpImage";
+import { ArrowRight, CalendarDays, FileText, Sparkles, Users } from "lucide-react";
 
-const HeroLine = ({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) => (
-  <div className="flex items-center justify-center gap-3">
-    {icon && <span className="inline-flex items-center">{icon}</span>}
-    <span>{children}</span>
-  </div>
-);
+const logos = [
+  "/logos/burberry.png",
+  "/logos/chanel.png",
+  "/logos/dior.png",
+  "/logos/fendi.png",
+  "/logos/louis.png",
+  "/logos/polo.png",
+  "/logos/prada.webp",
+  "/logos/versace.webp",
+];
 
-export default function Page() {
-  const logos = [
-    "/logos/burberry.png",
-    "/logos/chanel.png",
-    "/logos/dior.png",
-    "/logos/fendi.png",
-    "/logos/louis.png",
-    "/logos/polo.png",
-    "/logos/prada.png",
-    "/logos/versace.png"
-  ];
+const features = [
+  {
+    icon: Users,
+    eyebrow: "Customers",
+    title: "Every detail, remembered.",
+    copy: "Measurements, preferences and order history stay organised in one secure place.",
+  },
+  {
+    icon: CalendarDays,
+    eyebrow: "Schedule",
+    title: "Deadlines feel effortless.",
+    copy: "Plan trials and deliveries with a clear calendar built for a working boutique.",
+  },
+  {
+    icon: FileText,
+    eyebrow: "Orders",
+    title: "From request to invoice.",
+    copy: "Create orders, track progress and prepare professional invoices without extra tools.",
+  },
+];
 
-  const repeated = [...logos, ...logos, ...logos];
+const galleryStories = [
+  { src: "/landing/pop-1.png", eyebrow: "Materials", title: "Every fabric, remembered.", copy: "Keep preferences and details close to every customer order.", tone: "text-white", shade: "from-black/75 via-black/10 to-transparent" },
+  { src: "/landing/pop-2.png", eyebrow: "Craft", title: "Detail deserves clarity.", copy: "Assign specialised work and keep every hand-finished step visible.", tone: "text-white", shade: "from-black/75 via-black/10 to-transparent" },
+  { src: "/landing/pop-3.png", eyebrow: "Workshop", title: "One calm place to work.", copy: "Orders, schedules and responsibilities stay organised together.", tone: "text-white", shade: "from-black/80 via-black/15 to-transparent" },
+  { src: "/landing/pop-4.png", eyebrow: "Workflow", title: "Know what happens next.", copy: "Track measurements, progress and delivery without the paper chase.", tone: "text-[#1d1d1f]", shade: "from-white/95 via-white/35 to-transparent" },
+  { src: "/landing/pop-5.png", eyebrow: "Customers", title: "A personal fit, every time.", copy: "Measurements and preferences return whenever your customer does.", tone: "text-[#1d1d1f]", shade: "from-white/95 via-white/40 to-transparent" },
+];
 
-const STAR = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    fill="currentColor"
-    viewBox="0 0 16 16"
-    className="mb-4 text-emerald-600"
-  >
-    <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1" />
-  </svg>
-);
+const editorialHeroSlides = [
+  { src: "/images/landing/hero-1.jpg", alt: "Bridal couture photographed in the rain" },
+  { src: "/images/landing/hero-2.png", alt: "A bridal party in designer lehengas" },
+  { src: "/images/landing/hero-3.png", alt: "An ivory bridal look in a quiet interior" },
+  { src: "/images/landing/hero-4.png", alt: "A flowing bridal gown in a forest" },
+  { src: "/images/landing/hero-5.png", alt: "A red bridal veil in warm evening light" },
+    { src: "/images/landing/hero-6.jpg", alt: "A red bridal veil in warm evening light" },
 
+];
 
+export default function TailorLandingPage() {
+  const movingLogos = [...logos, ...logos];
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0);
+  const heroTouchStartX = useRef<number | null>(null);
+  const heroDidSwipe = useRef(false);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveHeroSlide((current) => (current + 1) % editorialHeroSlides.length);
+    }, 5600);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
-    <div className="relative min-h-screen pointer-events-none  overflow-hidden pt-16 z-0">
-      {/* <Waves
-        lineColor="#D3D3D3"
-        backgroundColor="rgba(255,255,255,0.06)"
-        waveSpeedX={0.02}
-        waveSpeedY={0.01}
-        waveAmpX={40}
-        waveAmpY={20}
-        friction={0.9}
-        tension={0.01}
-        maxCursorMove={120}
-        xGap={12}
-        yGap={36}
-      /> */}
-
-      {/* content above waves */}
-      <div className="relative z-10 flex flex-col min-h-screen z-0">
-
-        <section className="flex-1 flex items-center justify-center px-6 pt-10 md:pt-14 pb-16 overflow-x-hidden">
-  <div className="relative w-full max-w-7xl mx-auto">
-
-    {/* LEFT ROTATING LIST — DESKTOP ONLY (UNCHANGED) */}
-    <div className="absolute -left-5 top-24 hidden lg:flex flex-col items-start text-gray-800 font-medium text-xl">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="26"
-        height="26"
-        fill="currentColor"
-        viewBox="0 0 16 16"
-        className="mb-4 text-emerald-600"
+    <div className="font-Poppins overflow-hidden bg-white  text-[#1d1d1f]">
+      <section
+        className="relative flex h-screen touch-pan-y items-center justify-center overflow-hidden px-5 py-16 md:px-10"
+        onClick={(event) => {
+          if (heroDidSwipe.current) {
+            heroDidSwipe.current = false;
+            return;
+          }
+          if ((event.target as HTMLElement).closest("a, button")) return;
+          setActiveHeroSlide((current) => (current + 1) % editorialHeroSlides.length);
+        }}
+        onTouchStart={(event) => {
+          heroDidSwipe.current = false;
+          heroTouchStartX.current = event.touches[0]?.clientX ?? null;
+        }}
+        onTouchEnd={(event) => {
+          if (heroTouchStartX.current === null) return;
+          const distance = event.changedTouches[0].clientX - heroTouchStartX.current;
+          heroTouchStartX.current = null;
+          if (Math.abs(distance) < 45) return;
+          heroDidSwipe.current = true;
+          setActiveHeroSlide((current) =>
+            distance < 0
+              ? (current + 1) % editorialHeroSlides.length
+              : (current - 1 + editorialHeroSlides.length) % editorialHeroSlides.length,
+          );
+        }}
       >
-        <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1" />
-      </svg>
-
-      <div className="relative overflow-hidden h-[128px]">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-10" />
-        <div className="animate-listRotate space-y-2">
-          <span className="block">Clothing</span>
-          <span className="block">Embroidery</span>
-          <span className="block">Tailoring</span>
-          <span className="block">Bespoke Services</span>
-          <span className="block">Clothing</span>
-          <span className="block">Embroidery</span>
-          <span className="block">Tailoring</span>
-          <span className="block">Bespoke Services</span>
+        <div className="absolute inset-0 bg-[#171512]" aria-hidden="true">
+          {editorialHeroSlides.map((slide, index) => (
+            <WebpImage
+              key={slide.src}
+              src={slide.src}
+              alt=""
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding="async"
+              className={`absolute inset-0 h-full w-full object-cover object-center transition-[opacity,transform] duration-1000 ease-out ${activeHeroSlide === index ? "scale-100 opacity-100" : "scale-[1.015] opacity-0"}`}
+            />
+          ))}
         </div>
-      </div>
-    </div>
-
-    {/* RIGHT SIDE TEXT — DESKTOP ONLY (UNCHANGED) */}
-    <div className="absolute right-0 top-12 hidden lg:block max-w-xs text-md text-gray-700">
-      <span className="font-semibold text-emerald-600">
-        Trusted by 360+ fashion boutique owners
-      </span>
-      <span className="font-semibold">
-        {" "}– from independent tailors and designer studios to modern fashion houses.
-      </span>
-    </div>
-
-    {/* CENTER CONTENT */}
-    <div className="text-center max-w-4xl mx-auto px-2">
-      <h1 className="text-[clamp(2.2rem,6vw,4.5rem)] md:text-7xl font-bold leading-tight text-black space-y-6">
-
-        <div className="lg:-translate-x-24">
-          Master Your Craft, and
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-black/20" aria-hidden="true" />
+        <div className="reveal-on-scroll relative flex-col items-start justify-start z-10 w-full max-w-[1500px] px-3 py-12 text-white sm:px-12 md:py-16">
+          {/* <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/75 md:text-sm">Boutique management, refined</p> */}
+          <h1 className="  mt-4 max-w-[900px] text-[clamp(3rem,7vw,6.4rem)] font-medium leading-[0.95] tracking-[-0.035em]">Your craft. Beautifully organised.</h1>
+          <p className=" mt-7 max-w-2xl text-start flex justifty-start leading-7 text-white md:text-xl md:leading-8"   style={{fontWeight:200}}>Bring customers, measurements, orders and payments into one thoughtful workspace made for modern boutiques.</p>
+          <div className="mt-9 flex flex-col items-start justify-start gap-3 sm:flex-row">
+            <Link href="/auth" className="inline-flex items-center gap-2 border border-white/80 bg-white/5 px-8 py-4 text-sm font-light text-white backdrop-blur-sm transition duration-300 hover:bg-white hover:text-[#151515] md:text-base">Start with TailorPro <ArrowRight size={18} /></Link>
+            <a href="#features" className="inline-flex items-center gap-2 px-7 py-4 text-sm font-light text-white transition hover:text-white/65 md:text-base">Explore the workspace <ArrowRight size={17} /></a>
+          </div>
         </div>
-
-        <div>
-          Simplify
+        <div className="absolute bottom-7 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2" aria-label={`Hero image ${activeHeroSlide + 1} of ${editorialHeroSlides.length}`}>
+          {editorialHeroSlides.map((slide, index) => (
+            <button key={`${slide.src}-control`} type="button" onClick={() => setActiveHeroSlide(index)} aria-label={`Show hero image ${index + 1}`} className={`h-1.5 rounded-full transition-all duration-300 ${activeHeroSlide === index ? "w-8 bg-white" : "w-1.5 bg-white/45 hover:bg-white/75"}`} />
+          ))}
         </div>
+      </section>
 
-        <div className="lg:translate-x-24">
-          <span className="text-emerald-600">Your Store</span> with Tailor
-          <span className="text-emerald-600">Pro</span>
-        </div>
-
-      </h1>
-
-      {/* CTA */}
-      <div className="mt-10 flex justify-center">
-        <Link
-          href="/auth"
-          className="inline-flex items-center gap-3 bg-black text-white rounded-full px-8 py-3 text-lg font-medium hover:bg-gray-900 transition"
-        >
-          Join Us Now
-          <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-emerald-600">
-            <svg
-              className="h-6 w-6 text-white"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path
-                d="M5 12h14M12 5l7 7-7 7"
-                stroke="white"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+      <section aria-label="Fashion brands" className="py-9 md:py-11">
+        <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+          <div className="tailor-logo-marquee flex w-max items-center gap-16">
+            {movingLogos.map((src, index) => (
+              <WebpImage
+                key={`${src}-${index}`}
+                src={src}
+                alt=""
+                className="h-8 w-24 shrink-0 object-contain brightness-0"
               />
-            </svg>
-          </span>
-        </Link>
-      </div>
-    </div>
-  </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-  {/* BOTTOM DECORATIVE SVG — HIDDEN ON MOBILE */}
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="36"
-    height="36"
-    fill="currentColor"
-    viewBox="0 0 16 16"
-    className="hidden lg:block mb-5 mr-20 text-emerald-700"
-  >
-    <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828z" />
-  </svg>
+      <section aria-label="Trusted by boutiques" className="bg-[#f7f6f2] px-6 py-20 md:py-28">
+        <div className="reveal-on-scroll mx-auto max-w-[1180px]">
+          {/* <div className="mx-auto h-px w-12 bg-emerald-700" aria-hidden="true" /> */}
+          <p className="mt-7 text-center text-xl font-light uppercase tracking-[0.24em] text-[#555557] md:text-2xl">Trusted by boutiques</p>
+          <div className="mt-12 grid divide-y divide-black/10 text-center md:grid-cols-3 md:divide-x md:divide-y-0">
+            <div className="px-5 py-9 md:py-5"><AnimatedCount value={360} suffix="+" /><span className="mt-4 block text-sm font-light tracking-[0.08em] text-[#6e6e73] md:text-base">Boutiques</span></div>
+            <div className="px-5 py-9 md:py-5"><AnimatedCount value={1200} suffix="+" /><span className="mt-4 block text-sm font-light tracking-[0.08em] text-[#6e6e73] md:text-base">Orders organised</span></div>
+            <div className="px-5 py-9 md:py-5"><AnimatedCount value={98} suffix="%" /><span className="mt-4 block text-sm font-light tracking-[0.08em] text-[#6e6e73] md:text-base">Customer satisfaction</span></div>
+          </div>
+        </div>
+      </section>
 
-  <style>{`
-    @keyframes listRotate {
-      from { transform: translateY(0); }
-      to { transform: translateY(-50%); }
-    }
-    .animate-listRotate {
-      animation: listRotate 10s linear infinite;
-    }
-  `}</style>
-</section>
-
-        
-{/* <section className="flex-1 flex items-center justify-center px-6 pt-28 pb-16">
-  <div className="relative w-full max-w-7xl mx-auto">
-
-  <div className="absolute -left-5 top-24 hidden lg:flex flex-col items-start text-gray-800 font-medium text-xl">
-
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="26"
-    height="26"
-    fill="currentColor"
-    viewBox="0 0 16 16"
-    className="mb-4 text-emerald-600"
-  >
-  <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1"/>
-  </svg>
-
-  <div className="relative overflow-hidden h-[128px]">
-
-     <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-10" />
-    
-    <div className="animate-listRotate space-y-2">
-      <span className="block">Clothing</span>
-      <span className="block">Embroidery</span>
-      <span className="block">Tailoring</span>
-      <span className="block">Bespoke Services</span>
-
-      <span className="block">Clothing</span>
-      <span className="block">Embroidery</span>
-      <span className="block">Tailoring</span>
-      <span className="block">Bespoke Services</span>
-    </div>
-  </div>
-</div>
-
-<style>{`
-@keyframes listRotate {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-50%);
-  }
-}
-.animate-listRotate {
-  animation: listRotate 10s linear infinite;
-}
-`}</style>
-
-
-    
-    <div className="absolute right-0 top-12 hidden lg:block max-w-xs text-md text-gray-700">
-      <span className="font-semibold text-emerald-600">
-      Trusted by 360+ fashion boutique owners
-      </span>
-      <span className="font-semibold">
-        {" "}- from independent tailors and designer studios to modern fashion houses.
-      </span>
-    </div>
-
-    <div className="text-center max-w-4xl mx-auto">
-<h1 className="text-5xl md:text-7xl font-bold leading-tight text-black space-y-6">
-  <div className="-translate-x-24">
-    Master Your Craft, and
-  </div>
-
-  <div>
-    Simplify
-  </div>
-
-  <div className="translate-x-24">
-    <span className="text-emerald-600">Your Store</span> with Tilor
-    <span className="text-emerald-600">Pro</span>
-  </div>
-</h1>
-
-      <div className="mt-10">
-        <Link
-          href="/auth"
-          className="inline-flex items-center gap-3 bg-black text-white rounded-full px-8 py-3 text-lg font-medium hover:bg-gray-900 transition"
-        >
-          Join Us Now
-                <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-emerald-600">
-                  <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M5 12h14M12 5l7 7-7 7" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-        </Link>
-      </div>
-    </div>
-  </div>
- <svg 
- xmlns="http://www.w3.org/2000/svg" 
- width="36" 
- height="36" 
- fill="currentColor" 
- viewBox="0 0 16 16" 
- className="mb-5 mr-20 text-emerald-700">
-  <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"/>
-  </svg>
-</section> */}
-
-
-        <section className="w-full bg-transparent py-8">
-          <div className="relative overflow-hidden">
-            <div
-              className="flex items-center gap-8 will-change-transform"
-              style={{
-                animation: "marquee 24s linear infinite",
-              }}
+      <section className="bg-[#f5f5f7] px-5 py-24 md:px-8 md:py-32">
+        <div className="mx-auto max-w-[1180px] text-center">
+         {/* <p className="text-sm font-semibold text-emerald-700">One calm workspace</p> */}
+          <h2 className="mx-auto mt-2 max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-[#1d1d1f] md:text-7xl">
+            More time for the work only you can do.
+          </h2>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#6e6e73] md:text-xl">
+            TailorPro brings the day-to-day work of your studio together, without making the experience feel complicated.
+          </p>
+          <div className="mt-16 overflow-hidden bg-[#e8e8ed] shadow-[0_25px_80px_rgba(0,0,0,0.08)] md:mt-20">
+            <video
+              className="h-[360px] w-full object-cover object-center md:h-[680px]"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="Tailoring craft in motion"
             >
-              {repeated.map((src, idx) => (
-                <div key={`${src}-${idx}`} className="flex-shrink-0">
-                  <img src={src} alt={`partner-${idx}`} className="h-12 md:h-16 object-contain" />
+              <source src="/videos/tailor-craft.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white px-5 py-24 md:px-8 md:py-36">
+        <div className="mx-auto max-w-[1180px] text-center">
+          {/* <p className="text-sm font-semibold text-emerald-700">Everything in view</p> */}
+          <h2 className="mx-auto  max-w-4xl text-4xl font-semibold tracking-[-0.04em] md:text-7xl">
+            Your boutique, beautifully under control.
+          </h2>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#6e6e73] md:text-xl">
+            Orders, measurements, appointments and payments come together in one clear dashboard.
+          </p>
+
+        </div>
+
+        <div className="reveal-on-scroll mx-auto mt-16 w-full max-w-[1180px] md:mt-20">
+          <WebpImage
+            src="/landing/image3.png"
+            alt="TailorPro dashboard in a tailoring workshop"
+            className="block h-auto w-full"
+          />
+        </div>
+      </section>
+
+      <StoryGallery />
+
+      {/* <section id="features" className="bg-white px-6 py-24 md:py-36">
+        <div className="mx-auto max-w-[1180px]">
+          <div className="grid gap-8 border-b border-black/10 pb-12 md:grid-cols-[1fr_2fr] md:items-end md:gap-16 md:pb-16">
+            <div>
+              <div className="h-px w-12 bg-emerald-700" aria-hidden="true" />
+              <p className="mt-5 text-xs font-medium uppercase tracking-[0.26em] text-emerald-700 md:text-sm">
+                Built for boutique work
+              </p>
+              <p className="mt-4 max-w-sm text-base font-light leading-7 text-[#6e6e73]">
+                Everything your team needs, without the unnecessary complexity.
+              </p>
+            </div>
+            <h2 className="max-w-4xl text-4xl font-semibold leading-[1.02] tracking-[-0.045em] text-[#1d1d1f] md:text-6xl">
+              Powerful where it matters. Simple everywhere else.
+            </h2>
+          </div>
+
+          <div className="mt-10 grid border-l border-t border-black/10 md:mt-14 md:grid-cols-3">
+            {features.map(({ icon: Icon, eyebrow, title, copy }, index) => (
+              <article
+                key={title}
+                className="group relative flex min-h-[410px] flex-col border-b border-r border-black/10 bg-[#f5f5f7] p-8 transition duration-500 hover:bg-white hover:shadow-[0_24px_60px_rgba(0,0,0,0.08)] md:p-10"
+              >
+                <div className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-emerald-700 transition-transform duration-500 group-hover:scale-x-100" aria-hidden="true" />
+                <div className="flex items-start justify-between">
+                  <span className="grid h-14 w-14 place-items-center border border-emerald-700/30 text-emerald-700 transition duration-500 group-hover:bg-emerald-700 group-hover:text-white">
+                    <Icon size={29} strokeWidth={1.4} />
+                  </span>
+                  <span className="text-sm font-light tracking-[0.18em] text-[#9a9a9f]">0{index + 1}</span>
                 </div>
-              ))}
+                <div className="mt-auto pt-14">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">{eyebrow}</p>
+                  <h3 className="mt-5 max-w-xs text-3xl font-semibold leading-[1.08] tracking-[-0.035em] text-[#1d1d1f] md:text-4xl">
+                    {title}
+                  </h3>
+                  <div className="mt-6 h-px w-10 bg-emerald-700/50 transition-all duration-500 group-hover:w-20" aria-hidden="true" />
+                  <p className="mt-6 max-w-sm text-base font-light leading-7 text-[#6e6e73]">{copy}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section> */}
+
+      <section className="bg-[#f5f5f7] px-6 py-24 md:py-36">
+        <div className="mx-auto max-w-[1180px]">
+          <div className=" max-w-3xl">
+            {/* <p className="text-sm font-semibold text-emerald-700">The craft behind every order</p> */}
+            <h2 className=" text-4xl font-semibold tracking-[-0.04em] md:text-6xl">Made by hand. Managed with clarity.</h2>
+          </div>
+          <div className="mt-14 grid gap-5 md:grid-cols-3">
+            {[
+              { src: "/landing/fabric-texture.jpg", label: "Fabric texture", position: "object-center" },
+              { src: "/landing/hand-embroidery.jpg", label: "Hand embroidery", position: "object-center" },
+              { src: "/landing/tailoring-tools.jpg", label: "Tailoring tools", position: "object-center" },
+            ].map(({ src, label, position }) => (
+              <figure key={label} className=" group">
+                <div className="overflow-hidden bg-[#e8e8ed]">
+                  <WebpImage src={src} alt={label} className={`slow-zoom-image h-[420px] w-full object-cover md:h-[520px] ${position}`} />
+                </div>
+                <figcaption className="mt-4 text-lg font-semibold text-[#3a3a3c] md:text-xl">{label}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* <section className="bg-[#f5f5f7] px-6 py-24 md:py-36">
+        <div className=" mx-auto grid max-w-[1180px] gap-10  py-10 md:grid-cols-[320px_1fr] md:items-stretch md:gap-16 md:py-16">
+          <div className="relative min-h-[360px] overflow-hidden  md:min-h-[430px]">
+            <WebpImage src="/landing/boutique-owner.jpg" alt="Portrait of TailorPro boutique owner Neeraja Sunny" className="absolute inset-0 h-full w-full object-cover object-center" />
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-emerald-700" aria-hidden="true" />
+          </div>
+          <div className="flex flex-col justify-between py-1 md:py-5">
+            <div>
+             
+              <span className="mt-8 block text-6xl font-light leading-none text-emerald-700/25 md:text-8xl" aria-hidden="true">“</span>
+            <blockquote className="-mt-5 max-w-3xl text-3xl font-medium leading-[1.12] tracking-[-0.04em] text-[#000] md:-mt-8 md:text-5xl">
+              “TailorPro gives our team more time for fittings, details and the people we design for.”
+            </blockquote>
+            </div>
+            <div className="mt-10 border-t border-black/10 pt-6 [&>p]:!mt-0 [&>p]:!text-[#1d1d1f] [&_span]:!font-light [&_span]:!text-[#6e6e73]">
+            <p className="mt-7 text-sm font-semibold text-white/80">Neeraja Sunny <span className="font-normal text-white/45">— Boutique owner, Bengaluru</span></p>
             </div>
           </div>
-        </section>
+        </div>
+      </section> */}
 
-
-        {/* THIRD SECTION */}
-<section className="relative z-10 px-6 py-12">
-  <div className="max-w-8xl mx-auto">
-
-    {/* TOP CARD GRID */}
-    <div className="bg-gray-50 rounded-[40px] p-12 md:p-30">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-
-        {/* Column 1 */}
-      <div className="flex flex-col gap-6">
-      <div className="bg-gray-200 rounded-2xl h-60 relative overflow-hidden">
-        <img
-        src="/landing/image2.png"
-        alt="Customer History"
-        className="h-full w-full object-cover"
-        />
-      </div>
-
-
-          <div className="bg-gray-200 rounded-2xl p-5 text-lg font-semibold">
-            Store customer measurements, preferences, and order history in one secure place, always ready when you need them.
+      <section className="relative min-h-[720px] overflow-hidden text-white md:min-h-[840px]">
+        <div className="absolute inset-0 ">
+          <WebpImage src="/landing/last-1.png" alt="A red bridal couture look" className="h-full min-h-[360px] w-full object-cover object-center" />
+           {/* <WebpImage src="/landing/closing-ivory-bride.jpg" alt="An ivory bridal couture look" className="hidden h-full w-full object-cover object-center md:block" />  */}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10" aria-hidden="true" />
+        <div className="relative z-10 flex min-h-[720px] items-end justify-center px-6 pb-16 text-center md:min-h-[840px] md:pb-24">
+          <div className="reveal-on-scroll max-w-4xl">
+            {/* <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/75 md:text-sm">Made for the way boutiques work</p> */}
+            <h2 className="font-PlayfairDisplay mt-4 text-5xl font-medium leading-[0.98] tracking-[-0.035em] md:text-7xl">Made with care. Managed with clarity.</h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-white/80 md:text-xl md:leading-8">Give every order, fitting and hand-finished detail the attention it deserves.</p>
+            <Link href="/auth" className="mt-9 inline-flex items-center gap-2 border border-white/80 bg-white/5 px-9 py-4 text-sm font-semibold text-white backdrop-blur-sm transition duration-300 hover:bg-white hover:text-[#151515] md:text-base">Begin with TailorPro <ArrowRight size={18} /></Link>
           </div>
         </div>
+      </section>
 
-        {/* Column 2 */}
-        <div className="flex flex-col gap-6">
-          <div className="bg-gray-200 rounded-2xl p-5 text-lg font-semibold">
-            Designed to help tailors and fashion boutiques work faster, stay organized, and deliver a premium experience every time.
-          </div>
-
-          <div className="bg-gray-200 rounded-2xl h-56 relative overflow-hidden">
-  <img
-    src="/landing/image5.png"
-    alt="All in one tailoring app"
-    className="h-full w-full object-cover"
-  />
-</div>
-
-        </div>
-
-        {/* Column 3 */}
-        <div className="bg-gray-200 rounded-2xl min-h-[280px] relative overflow-hidden">
-  <img
-    src="/landing/image4.png"
-    alt="Tailoring management dashboard"
-    className="h-full w-full object-cover"
-  />
-</div>
-
-        {/* Column 4 */}
-        <div className="flex flex-col gap-6">
-<div className="bg-gray-200 rounded-2xl h-60 relative overflow-hidden">
-  <img
-    src="/landing/image6.png"
-    alt="Seamless tailoring experience"
-    className="h-full w-full object-cover"
-        />
-        </div>
-
-          <div className="bg-gray-200 rounded-2xl p-5 text-lg font-semibold">
-            Seamless order creation, instant updates, and clear tracking - so your customers leave saying,
-            “Whoa, that was smooth.”
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* MIDDLE BAR */}
-    <div
-  className="
-    mt-5 bg-gray-50 rounded-full px-4 py-4
-    flex flex-col gap-4 items-center
-    md:flex-row md:gap-0 md:items-center md:justify-between
-  "
->
-  <span className="text-emerald-700 px-6 py-3 md:px-8 md:py-4 rounded-full text-md font-medium border-2 border-emerald-700">
-    Why Us
-  </span>
-
-  <span className="text-lg md:text-xl font-medium text-gray-800 hover:underline cursor-pointer text-center">
-    Trusted on Communities →
-  </span>
-
-  <span className="border-2 border-emerald-700 text-emerald-700 px-6 py-3 md:px-8 md:py-4 rounded-full text-md font-medium">
-    Our Features
-  </span>
-</div>
-
-    {/* <div className="mt-5 bg-gray-50 rounded-full px-6 py-6 flex items-center justify-between">
-      <span className="text-emerald-700 px-8 py-4 rounded-full text-md font-medium border-2 border-emerald-700">
-        Why Us 
-      </span>
-
-      <span className="text-xl font-medium text-gray-800 hover:underline cursor-pointer">
-        Trusted on Communities →
-      </span>
-
-      <span className="border-2 border-emerald-700 text-emerald-700 px-8 py-4 rounded-full text-md font-medium">
-        Our Features
-      </span>
-    </div> */}
-  
-
-<div className="relative mt-5 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start bg-gray-50 rounded-[40px] p-6 md:p-12 lg:p-30 overflow-hidden">
-  
-  {/* LEFT – FLOATING PILLS (DESKTOP ONLY) */}
-  <div className="hidden lg:block">
-    <div className="relative min-h-[580px]">
-
-      {/* 1 */}
-      <div className="absolute top-4 left-8 flex items-center gap-3">
-        <span className="rounded-full bg-emerald-300 text-black px-4 py-2 font-medium text-md">
-          Flexible Registration
-        </span>
-        {STAR}
-      </div>
-
-      {/* 2 */}
-      <div className="absolute top-24 left-28 flex items-center gap-3">
-        <span className="rounded-full bg-gray-700 text-white px-4 py-2 font-medium text-md">
-          Simplified order creation
-        </span>
-        {STAR}
-      </div>
-
-      {/* 3 */}
-      <div className="absolute top-14 right-12 flex items-center gap-3">
-        <span className="rounded-full bg-emerald-300 text-black px-4 py-2 font-medium text-md">
-          Track Daily Revenue
-        </span>
-        {STAR}
-      </div>
-
-      {/* 4 */}
-      <div className="absolute top-44 left-1/2 -translate-x-1/2 flex items-center gap-3">
-        <span className="rounded-full bg-gray-700 text-white px-4 py-2 font-medium text-md">
-          Get Instant reminders on Whatsapp
-        </span>
-        {STAR}
-      </div>
-
-      {/* 5 */}
-      <div className="absolute top-64 left-20 flex items-center gap-3">
-        <span className="rounded-full bg-emerald-300 text-black px-4 py-2 font-medium text-md">
-          Automated communication
-        </span>
-        {STAR}
-      </div>
-
-      {/* 6 */}
-      <div className="absolute top-80 right-20 flex items-center gap-3">
-        <span className="rounded-full bg-gray-700 text-white px-4 py-2 font-medium text-md">
-          Enhance customer engagement
-        </span>
-        {STAR}
-      </div>
-
-      {/* TailorPro Floating Pill */}
-      <div className="absolute top-[200px] right-[-78px] z-10">
-        <span className="flex items-center gap-2 rounded-full bg-emerald-300 text-black px-6 py-2 font-medium text-xl border-2 border-gray-700 shadow-lg">
-          TailorPro
-          <img
-            src="/dressmaker.png"
-            alt="TailorPro Logo"
-            className="h-8 w-8 object-contain"
-          />
-        </span>
-      </div>
-
-      {/* 7 */}
-      <div className="absolute bottom-28 left-12 flex items-center gap-3">
-        <span className="rounded-full bg-gray-700 text-white px-4 py-2 font-medium text-md">
-          Realtime Order Tracking
-        </span>
-        {STAR}
-      </div>
-
-      {/* 8 */}
-      <div className="absolute bottom-16 right-10 flex items-center gap-3">
-        <span className="rounded-full bg-emerald-300 text-black px-4 py-2 font-medium text-md">
-          Access Anywhere, Anytime
-        </span>
-        {STAR}
-      </div>
-
-      {/* 9 */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center gap-3">
-        <span className="rounded-full bg-gray-700 text-white px-4 py-2 font-medium text-md">
-          Smart billing and invoice generation
-        </span>
-        {STAR}
-      </div>
-
-    </div>
-  </div>
-
-  {/* RIGHT – CONTENT (ALWAYS VISIBLE) */}
-  <div>
-    <p className="text-2xl md:text-4xl leading-normal tracking-normal font-semibold text-gray-950 mb-5">
-      Modern problems need
-      <span> Modern solutions</span>
-    </p>
-
-    <div className="bg-gray-200 rounded-3xl min-h-[260px] md:min-h-[500px] lg:h-80 flex items-center justify-center overflow-hidden">
-
-      <img
-        src="/landing/image1.png"
-        alt="Modern tailoring solutions"
-        className="h-full w-full object-cover rounded-3xl"
-      />
-    </div>
-  </div>
-</div>
-
-  </div>
-</section>
-
-
-
-<section className="relative bg-white rounded-[40px] px-6 py-14 md:px-6 md:py-14">
-
-  {/* Heading */}
-  <div className="max-w-7xl mx-auto text-center mb-16">
-    <h2 className="text-3xl md:text-5xl font-semibold text-gray-950 leading-loose tracking-wide">
-      93% of Organisers using TailorPro
-      <br />
-      <span className="inline-flex right-10 gap-4">
-      
-        hit their Registration goals.
-
-        <svg xmlns="http://www.w3.org/2000/svg" className="right-20 text-emerald-600" width="52" height="52" fill="currentColor" viewBox="0 0 16 16">
-        <path d="M8.01 4.555 4.005 7.11 8.01 9.665 4.005 12.22 0 9.651l4.005-2.555L0 4.555 4.005 2zm-4.026 8.487 4.006-2.555 4.005 2.555-4.005 2.555zm4.026-3.39 4.005-2.556L8.01 4.555 11.995 2 16 4.555 11.995 7.11 16 9.665l-4.005 2.555z"/>
-        </svg>
-      </span>
-      <br />
-      Let&apos;s make you one of them.
-    </h2>
-  </div>
-
-  {/* Cards */}
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-    {/* Card 1 */}
-    <div className="bg-zinc-200 border-2 border-zinc-300 rounded-3xl p-8 flex flex-col gap-4">
-      <div className="flex items-start justify-between">
-        <img src="/scissors.png" alt="Mascot" className="h-16 mt-2" />
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" className="text-gray-500" viewBox="0 0 16 16">
-  <path d="M11.5 4v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m0 6.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132"/>
-</svg>
-      </div>
-      <p className="text-xl font-normal text-black mt-5">
-        60 hours saved per order
-        <br />
-        using TailorPro.
-      </p>
-    </div>
-
-    {/* Card 2 */}
-    <div className="bg-zinc-200 border-2 border-zinc-300 rounded-3xl p-8 flex flex-col gap-4">
-      <div className="flex items-start justify-between">
-        <img src="/sewingmachine.png" alt="Mascot" className="h-24" />
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" className="text-gray-500" viewBox="0 0 16 16">
-  <path fillRule="evenodd" d="m8 2.42-.717-.737c-1.13-1.161-3.243-.777-4.01.72-.35.685-.451 1.707.236 3.062C4.16 6.753 5.52 8.32 8 10.042c2.479-1.723 3.839-3.29 4.491-4.577.687-1.355.587-2.377.236-3.061-.767-1.498-2.88-1.882-4.01-.721zm-.49 8.5c-10.78-7.44-3-13.155.359-10.063q.068.062.132.129.065-.067.132-.129c3.36-3.092 11.137 2.624.357 10.063l.235.468a.25.25 0 1 1-.448.224l-.008-.017c.008.11.02.202.037.29.054.27.161.488.419 1.003.288.578.235 1.15.076 1.629-.157.469-.422.867-.588 1.115l-.004.007a.25.25 0 1 1-.416-.278c.168-.252.4-.6.533-1.003.133-.396.163-.824-.049-1.246l-.013-.028c-.24-.48-.38-.758-.448-1.102a3 3 0 0 1-.052-.45l-.04.08a.25.25 0 1 1-.447-.224l.235-.468ZM6.013 2.06c-.649-.18-1.483.083-1.85.798-.131.258-.245.689-.08 1.335.063.244.414.198.487-.043.21-.697.627-1.447 1.359-1.692.217-.073.304-.337.084-.398"/>
-</svg>
-      </div>
-      <p className="text-xl font-normal text-black">
-        2x Sales Increased
-        <br />
-        per order through TP.
-      </p>
-    </div>
-
-    {/* Card 3 */}
-    <div className="bg-zinc-200 border-2 border-zinc-300 rounded-3xl p-8 flex flex-col gap-4">
-      <div className="flex items-start justify-between">
-        <img src="/thread.png" alt="Mascot" className="h-20" />
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" className="text-gray-500" viewBox="0 0 16 16">
-  <path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z"/>
-</svg>
-      </div>
-      <p className="text-xl font-normal text-black mt-3">
-        20+ Years Tailoring Tech Experience
-      </p>
-    </div>
-  </div>
-</section>
-
-<Testimonials />
-
-
-
-
-      </div>
-      <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-33.333%); } /* adjust depending on repeats */
+      <style jsx global>{`
+        @keyframes tailorLogoMarquee {
+          from { transform: translateX(0); }
+          to { transform: translateX(calc(-50% - 2rem)); }
         }
-
-        /* Improve marquee responsiveness: slow on mobile */
-        @media (max-width: 640px) {
-          div[style*="animation: marquee"] {
-            animation-duration: 40s !important;
-          }
+        .tailor-logo-marquee { animation: tailorLogoMarquee 34s linear infinite; }
+        @keyframes gentleReveal {
+          from { opacity: 0; transform: translateY(28px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes gentleZoom {
+          from { transform: scale(1.06); }
+          to { transform: scale(1); }
+        }
+        .reveal-on-scroll {
+          animation: gentleReveal both ease-out;
+          animation-timeline: view();
+          animation-range: entry 10% cover 34%;
+        }
+        .slow-zoom-image {
+          animation: gentleZoom both linear;
+          animation-timeline: view();
+          animation-range: entry 5% cover 70%;
+        }
+        .tailor-story-scroller { scrollbar-width: none; }
+        .tailor-story-scroller::-webkit-scrollbar { display: none; }
+        @media (min-width: 768px) {
+          .tailor-logo-marquee { animation-duration: 40s; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .tailor-logo-marquee { animation: none; }
+          .reveal-on-scroll, .slow-zoom-image { animation: none; }
+          .tailor-story-scroller { scroll-behavior: auto; }
         }
       `}</style>
     </div>
+  );
+}
+
+function AnimatedCount({ value, suffix }: { value: number; suffix: string }) {
+  const counterRef = useRef<HTMLSpanElement>(null);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const element = counterRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setCount(value);
+        return;
+      }
+
+      const duration = 1600;
+      const startedAt = performance.now();
+      const animate = (now: number) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setCount(Math.round(value * eased));
+        if (progress < 1) window.requestAnimationFrame(animate);
+      };
+      window.requestAnimationFrame(animate);
+    }, { threshold: 0.45 });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [value]);
+
+  return (
+    <span ref={counterRef} className="block text-5xl font-extralight leading-none tracking-[-0.045em] text-[#19191a] tabular-nums md:text-7xl">
+      {count.toLocaleString("en-IN")}{suffix}
+    </span>
+  );
+}
+
+function StoryGallery() {
+  const [active, setActive] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const didSwipe = useRef(false);
+
+  const moveGallery = (direction: 1 | -1) => {
+    setActive((current) => (current + direction + galleryStories.length) % galleryStories.length);
+  };
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActive((current) => (current + 1) % galleryStories.length);
+    }, 5600);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return (
+    <section aria-label="TailorPro stories" className="bg-[#f5f5f7] py-24 md:py-32">
+      <div className="px-5 text-center md:px-8">
+        <h2 className="mx-auto mt-3 max-w-4xl text-4xl font-semibold tracking-[-0.045em] md:text-7xl">
+          Your whole boutique. In motion.
+        </h2>
+        <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#6e6e73]">
+          Move from first measurements to final delivery with every detail in view.
+        </p>
+      </div>
+
+      <div
+        className="relative mt-14 h-[470px] pb-20 w-full touch-pan-y overflow-hidden md:mt-18 md:h-[650px]"
+        onClick={(event) => {
+          if (didSwipe.current) {
+            didSwipe.current = false;
+            return;
+          }
+          if ((event.target as HTMLElement).closest("button")) return;
+          moveGallery(1);
+        }}
+        onTouchStart={(event) => {
+          didSwipe.current = false;
+          touchStartX.current = event.touches[0]?.clientX ?? null;
+        }}
+        onTouchEnd={(event) => {
+          if (touchStartX.current === null) return;
+          const distance = event.changedTouches[0].clientX - touchStartX.current;
+          touchStartX.current = null;
+          if (Math.abs(distance) < 45) return;
+          didSwipe.current = true;
+          moveGallery(distance < 0 ? 1 : -1);
+        }}
+      >
+        {galleryStories.map((story, index) => {
+          const rawDistance = index - active;
+          const distance =
+            rawDistance > galleryStories.length / 2
+              ? rawDistance - galleryStories.length
+              : rawDistance < -galleryStories.length / 2
+                ? rawDistance + galleryStories.length
+                : rawDistance;
+          const isActive = distance === 0;
+          const isNeighbour = Math.abs(distance) === 1;
+
+          return (
+            <article
+              key={story.title}
+              aria-hidden={!isActive}
+              className={`absolute left-1/2  top-1/2 h-[80%] w-[78%] max-w-[1180px] overflow-hidden bg-[#ddd] transition-[transform,opacity,filter,box-shadow] duration-1000 ease-in-out ${
+                isActive
+                  ? "z-20 opacity-100 shadow-[0_20px_55px_rgba(0,0,0,0.28)] blur-0"
+                  : isNeighbour
+                    ? "z-10 opacity-45 blur-[3px]"
+                    : "pointer-events-none z-0 opacity-0 blur-md"
+              }`}
+              style={{
+                transform: `translate(-50%, -50%) translateX(${distance * 82}%) scale(${isActive ? 1 : isNeighbour ? 0.86 : 0.72})`,
+              }}
+            >
+              <WebpImage
+                src={story.src}
+                alt=""
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+                className="h-full w-full object-cover object-center"
+              />
+              <div className={`absolute inset-0 bg-gradient-to-t ${story.shade}`} />
+              <div className={`absolute inset-x-0 bottom-0 p-6 sm:p-9 md:p-12 ${story.tone}`}>
+                {/* <p className="text-xs font-bold uppercase tracking-[0.18em] opacity-75">{story.eyebrow}</p> */}
+                <h3 className="mt-3 max-w-2xl text-3xl font-semibold tracking-[-0.04em] md:text-5xl">{story.title}</h3>
+                <p className="mt-3 max-w-xl text-sm leading-6 opacity-80 md:text-lg md:leading-7">{story.copy}</p>
+              </div>
+            </article>
+          );
+        })}
+
+        <div className="absolute bottom-7 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2" aria-label={`Story ${active + 1} of ${galleryStories.length}`}>
+          {galleryStories.map((story, index) => (
+            <button
+              key={`${story.title}-control`}
+              type="button"
+              onClick={() => {
+                setActive(index);
+              }}
+              aria-label={`Show ${story.title}`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                active === index ? "w-8 bg-white" : "w-1.5 bg-white/45 hover:bg-white/75"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

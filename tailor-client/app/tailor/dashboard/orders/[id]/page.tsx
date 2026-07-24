@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ChevronLeft, Download, Mail, PackageCheck, Printer, Share2 } from "lucide-react";
+import { ChevronLeft, Download, Mail, PackageCheck, Printer, Share2, UsersRound } from "lucide-react";
 import api from "@/lib/axios";
 
 type AdditionalCharge = {
@@ -21,6 +21,24 @@ type OrderItem = {
   additionalPrice?: number;
   trialDate?: string;
   deliveryDate?: string;
+  workAssignments?: WorkAssignment[];
+};
+
+type StaffOption = {
+  _id: string;
+  email: string;
+  fullName?: string;
+  staffSkills: string[];
+  weeklyAssigned: number;
+  weeklyOrderLimit: number;
+  monthlyAssigned: number;
+  monthlyOrderLimit: number;
+};
+
+type WorkAssignment = {
+  workType: string;
+  staff: StaffOption;
+  assignedAt?: string;
 };
 
 type Order = {
@@ -66,6 +84,9 @@ export default function OrderDetails() {
   const [sendingInvoice, setSendingInvoice] = useState<"email" | "share" | null>(null);
   const [actionError, setActionError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
+  const [staffList, setStaffList] = useState<StaffOption[]>([]);
+  const [assigningKey, setAssigningKey] = useState("");
+  const [customWork, setCustomWork] = useState<Record<string, string>>({});
 
   const fetchOrder = async () => {
     if (!params?.id) return;
@@ -83,7 +104,52 @@ export default function OrderDetails() {
 
   useEffect(() => {
     fetchOrder();
+    api.get("/api/staff/get").then((response) => setStaffList(response.data.staff || [])).catch(() => setStaffList([]));
   }, [params?.id]);
+
+  const assignWork = async (itemId: string, workType: string, staffId: string) => {
+    const key = `${itemId}-${workType}`;
+    try {
+      setAssigningKey(key);
+      setActionError("");
+      await api.patch(`/api/orders/item/${itemId}/assign-work`, { workType, staffId });
+      setActionMessage(staffId ? `${workType} work assigned.` : `${workType} assignment removed.`);
+      await Promise.all([fetchOrder(), api.get("/api/staff/get").then((response) => setStaffList(response.data.staff || []))]);
+    } catch (requestError: any) {
+      setActionError(requestError.response?.data?.message || "Unable to assign work.");
+    } finally { setAssigningKey(""); }
+  };
+
+  const autoAssignItem = async (item: OrderItem) => {
+    const workTypes = ["cutting", "stitching", "embroidery", "finishing"];
+    const alreadyAssigned = new Set((item.workAssignments || []).map((entry) => entry.workType));
+    const localLoad = new Map(staffList.map((staff) => [staff._id, { week: staff.weeklyAssigned, month: staff.monthlyAssigned }]));
+    try {
+      setAssigningKey(`${item._id}-auto`);
+      setActionError("");
+      for (const workType of workTypes.filter((type) => !alreadyAssigned.has(type))) {
+        const eligible = staffList
+          .filter((staff) => staff.staffSkills.length === 0 || staff.staffSkills.includes(workType))
+          .sort((a, b) => {
+            const aLoad = localLoad.get(a._id)!;
+            const bLoad = localLoad.get(b._id)!;
+            const aOver = aLoad.week >= a.weeklyOrderLimit || aLoad.month >= a.monthlyOrderLimit;
+            const bOver = bLoad.week >= b.weeklyOrderLimit || bLoad.month >= b.monthlyOrderLimit;
+            if (aOver !== bOver) return aOver ? 1 : -1;
+            return (aLoad.week / a.weeklyOrderLimit) - (bLoad.week / b.weeklyOrderLimit);
+          });
+        const selected = eligible[0];
+        if (!selected) continue;
+        await api.patch(`/api/orders/item/${item._id}/assign-work`, { workType, staffId: selected._id });
+        const load = localLoad.get(selected._id)!;
+        localLoad.set(selected._id, { week: load.week + 1, month: load.month + 1 });
+      }
+      setActionMessage("Unassigned work distributed by staff workload.");
+      await Promise.all([fetchOrder(), api.get("/api/staff/get").then((response) => setStaffList(response.data.staff || []))]);
+    } catch (requestError: any) {
+      setActionError(requestError.response?.data?.message || "Unable to auto-assign work.");
+    } finally { setAssigningKey(""); }
+  };
 
   const handleReceivePayment = async () => {
     if (!order || !amountReceived || Number(amountReceived) <= 0) return;
@@ -429,7 +495,7 @@ export default function OrderDetails() {
         </div>
       </div>
 
-      <section className="no-print border border-gray-200 bg-white p-5 sm:p-6">
+      <section id="assign-work" className="no-print scroll-mt-24 border border-gray-200 bg-white p-5 sm:p-6">
         <div className="flex flex-col gap-3 border-b border-gray-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Invoice details</p>
@@ -474,6 +540,26 @@ export default function OrderDetails() {
           <SummaryLine label="Paid" value={money(order.advanceGiven)} />
           <div className="flex justify-between font-bold text-emerald-700"><span>Balance due</span><span>{money(order.balanceDue)}</span></div>
         </div>
+      </section>
+
+      <section className="no-print border border-gray-200 bg-white p-5 sm:p-6">
+        <div className="flex items-start gap-3">
+          <UsersRound className="mt-0.5 text-emerald-700" size={22} />
+          <div><h2 className="text-xl font-bold text-gray-900">Assign work</h2><p className="mt-1 text-sm text-gray-500">Each list is ordered by the lightest weekly workload to help distribute work equally.</p></div>
+        </div>
+        {staffList.length === 0 ? <p className="mt-5 border border-dashed border-gray-300 p-5 text-sm text-gray-500">Add staff and their roles on the Staff page before assigning work.</p> : <div className="mt-5 space-y-5">{(order.items || []).map((item) => {
+          const existingTypes = (item.workAssignments || []).map((assignment) => assignment.workType);
+          const workTypes = Array.from(new Set(["cutting", "stitching", "embroidery", "finishing", ...existingTypes]));
+          return <article key={item._id} className="border border-gray-200 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-bold text-gray-900">{item.name || "Tailoring service"}</h3><p className="mt-1 text-xs capitalize text-gray-500">{item.category || item.type || "Custom outfit"}</p></div><div className="flex items-center gap-2"><span className="bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">{(item.workAssignments || []).length} assigned</span><button type="button" disabled={assigningKey === `${item._id}-auto`} onClick={() => autoAssignItem(item)} className="border border-emerald-700 px-3 py-1.5 text-xs font-bold text-emerald-700 disabled:opacity-50">{assigningKey === `${item._id}-auto` ? "Assigning..." : "Auto distribute"}</button></div></div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">{workTypes.map((workType) => {
+              const assignment = (item.workAssignments || []).find((entry) => entry.workType === workType);
+              const eligible = [...staffList].filter((staff) => staff.staffSkills.length === 0 || staff.staffSkills.includes(workType)).sort((a, b) => (a.weeklyAssigned / a.weeklyOrderLimit) - (b.weeklyAssigned / b.weeklyOrderLimit));
+              return <label key={workType} className="text-sm font-semibold capitalize text-gray-700">{workType}<select disabled={assigningKey === `${item._id}-${workType}`} value={assignment?.staff?._id || ""} onChange={(event) => assignWork(item._id, workType, event.target.value)} className="mt-1.5 h-11 w-full border border-gray-300 bg-white px-3 font-normal text-gray-800 disabled:opacity-60"><option value="">Unassigned</option>{eligible.map((staff, index) => <option key={staff._id} value={staff._id}>{index === 0 ? "Recommended · " : ""}{staff.fullName || staff.email} · {staff.weeklyAssigned}/{staff.weeklyOrderLimit} week</option>)}</select></label>;
+            })}</div>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row"><input value={customWork[item._id] || ""} onChange={(event) => setCustomWork((current) => ({ ...current, [item._id]: event.target.value }))} className="h-10 flex-1 border border-gray-300 px-3 text-sm" placeholder="Type another work, e.g. beadwork" /><select defaultValue="" onChange={(event) => { const workType = (customWork[item._id] || "").trim().toLowerCase(); if (workType && event.target.value) { assignWork(item._id, workType, event.target.value); setCustomWork((current) => ({ ...current, [item._id]: "" })); event.target.value = ""; } }} className="h-10 border border-gray-300 bg-white px-3 text-sm"><option value="">Assign custom work to…</option>{[...staffList].sort((a, b) => a.weeklyAssigned - b.weeklyAssigned).map((staff) => <option key={staff._id} value={staff._id}>{staff.fullName || staff.email}</option>)}</select></div>
+          </article>;
+        })}</div>}
       </section>
 
       <div ref={invoiceRef} aria-hidden="true" className="print-area pointer-events-none fixed left-[-10000px] top-0 z-0 w-[794px] bg-white p-10 text-gray-900">

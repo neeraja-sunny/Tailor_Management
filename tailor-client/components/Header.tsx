@@ -12,26 +12,35 @@ export default function Header() {
   const pathname = usePathname() || ''
   const [open, setOpen] = useState(false)
 
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
-useEffect(() => setMounted(true), []);
-
-  if (!mounted) return null;
+  useEffect(() => {
+    setMounted(true)
+    const updateHeader = () => setScrolled(window.scrollY > 24)
+    updateHeader()
+    window.addEventListener('scroll', updateHeader, { passive: true })
+    return () => window.removeEventListener('scroll', updateHeader)
+  }, [])
 
   const isLoggedIn = !!user
   const isAccountArea =
     pathname.startsWith('/tailor/dashboard') || pathname === '/tailor/profile'
+  const isLandingPage = pathname === '/tailor'
+  const isTransparent = isLandingPage && !scrolled
+
+  if (!mounted) return null
 
   return (
     <header
       className={clsx(
-        'no-print relative z-[1000] bg-transparent backdrop-blur left-0 w-full transition-all duration-300',
-        isLoggedIn
-          ? 'no-print bg-white shadow-sm backdrop-blur top-0 left-0 w-full'
-          : 'no-print bg-transparent backdrop-blur top-2 md:top-3 lg:top-5'
+        'no-print fixed left-0 top-0 z-[1000] w-full transition-all duration-300',
+        isTransparent
+          ? 'border-b border-transparent bg-transparent'
+          : 'border-b border-black/10 bg-[#f5f5f7]/95 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl',
       )}
     >
-      <div className="w-full flex items-center justify-between h-28 px-2 md:px-8 lg:px-10">
+      <div className="flex h-20 w-full items-center justify-between px-3 md:px-8 lg:px-10">
         
         {/* Left: Logo */}
         <div className="flex items-center gap-10">
@@ -39,16 +48,32 @@ useEffect(() => setMounted(true), []);
             <img
               src="/dressmaker.png"
               alt="TailorPro Logo"
-              className="h-14 w-14 object-contain"
+              className={clsx(
+                'h-11 w-11 object-contain transition-[filter] duration-300',
+                isTransparent && 'brightness-0 invert',
+              )}
             />
-            <span className="font-bold text-2xl text-black">
-              Tailor<span className="text-emerald-500">Pro</span>
+            <span
+              className={clsx(
+                'text-2xl font-bold transition-colors duration-300',
+                isTransparent ? 'text-white' : 'text-black',
+              )}
+            >
+              Tailor
+              <span className={isTransparent ? 'text-white' : 'text-emerald-500'}>
+                Pro
+              </span>
             </span>
           </Link>
 
           {/* Navigation links — ONLY when logged OUT */}
           {!loading && !isAccountArea && (
-            <nav className="hidden md:flex gap-8 text-lg text-black">
+            <nav
+              className={clsx(
+                'hidden gap-8 text-lg transition-colors duration-300 md:flex',
+                isTransparent ? 'text-white' : 'text-black',
+              )}
+            >
               {['Customers', 'Blogs', 'Pricing'].map((link) => (
                 <Link
                   key={link}
@@ -56,7 +81,12 @@ useEffect(() => setMounted(true), []);
                   className="relative group left-5"
                 >
                   {link}
-                  <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
+                  <span
+                    className={clsx(
+                      'absolute -bottom-1 left-0 h-[2px] w-0 transition-all duration-300 group-hover:w-full',
+                      isTransparent ? 'bg-white' : 'bg-black',
+                    )}
+                  />
                 </Link>
               ))}
             </nav>

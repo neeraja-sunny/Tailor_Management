@@ -64,7 +64,7 @@ const switchBoutique = async () => {
 
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="mx-auto max-w-2xl space-y-8 px-4 pb-4 pt-8 sm:px-6 sm:pb-6 sm:pt-10 lg:px-8 lg:pb-8 lg:pt-12">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-emerald-700">

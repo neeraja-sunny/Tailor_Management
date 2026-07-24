@@ -1,4 +1,5 @@
-import { Store, UsersRound } from "lucide-react";
+import { ArrowLeft, Store, UsersRound } from "lucide-react";
+import Link from "next/link";
 
 type ComingSoonPageOverlayProps = {
   title: "Store" | "Social";
@@ -39,6 +40,19 @@ export default function ComingSoonPageOverlay({
           <p className="mt-4 text-sm font-medium text-white/82">
             Currently in development
           </p>
+
+          <Link
+            href="/"
+            className="group pointer-events-auto relative mt-6 inline-flex items-center justify-center gap-2 overflow-hidden rounded-md border border-emerald-200/55 bg-emerald-300/18 px-6 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-lg shadow-emerald-950/30 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:border-white hover:bg-white hover:text-emerald-950 hover:shadow-xl hover:shadow-emerald-950/40 active:translate-y-0 active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+          >
+            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+            <ArrowLeft
+              size={18}
+              className="relative transition-transform duration-300 group-hover:-translate-x-1"
+              aria-hidden="true"
+            />
+            <span className="relative">Back to Home</span>
+          </Link>
 
           <p className="mt-8 text-xs font-semibold uppercase tracking-[0.24em] text-[#FCF4E1]/75">
             Stay Tuned

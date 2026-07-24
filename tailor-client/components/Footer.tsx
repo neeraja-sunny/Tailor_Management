@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="no-print bg-gray-50 border-t border-gray-200 mt-24 px-6 py-16">
+    <footer className="no-print bg-gray-50 border-t border-gray-200 pt-40 px-6 py-16">
       <div className="max-w-7xl mx-auto">
 
         {/* TOP GRID */}

@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import api from "@/lib/axios";
+import WebpImage from "@/components/WebpImage";
 
 interface Outfit {
   name: string;
@@ -18,7 +19,7 @@ const defaultOutfits: Outfit[] = [
   { name: "Pant", quantity: 1, image: "/outfits/pantimage.jpg" },
   { name: "Kurtha", quantity: 1, image: "/outfits/kurthaimage.jpg" },
   { name: "Blouse", quantity: 1, image: "/outfits/blouseimage.jpg" },
-  { name: "Churidar", quantity: 1, image: "/outfits/churidharimage.png" },
+  { name: "Churidar", quantity: 1, image: "/outfits/churidharimage.webp" },
   { name: "Coat", quantity: 1, image: "/outfits/coatimage.jpg" },
 ];
 
@@ -140,7 +141,7 @@ const addCustomOutfit = async () => {
               }`}
               onClick={() => toggleOutfit(o)}
             >
-              <img
+              <WebpImage
                 src={o.image}
                 alt={o.name}
                 className="absolute inset-0 w-full h-full object-cover"
@@ -170,7 +171,7 @@ const addCustomOutfit = async () => {
               }`}
               onClick={() => toggleOutfit(o)}
             >
-              <img
+              <WebpImage
                 src={o.image}
                 alt={o.name}
                 className="absolute inset-0 w-full h-full object-cover"
@@ -216,7 +217,7 @@ const addCustomOutfit = async () => {
       className="h-24 w-24 rounded-xl border-2 border-dashed border-emerald-400 flex items-center justify-center cursor-pointer hover:border-emerald-700 transition"
     >
       {preview ? (
-        <img
+        <WebpImage
           src={preview}
           alt="Preview"
           className="h-full w-full object-cover rounded-xl"

@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Store, UsersRound } from 'lucide-react'
 import OptimizedReveal from '@/components/OptimizedReveal'
 import SpotlightLinkButton from './SpotlightLinkButton'
+import WebpImage from './WebpImage'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -66,6 +67,9 @@ export default function ProductSection({
 
     const elements = parallaxRefs.current
     const speeds = elements.map(el => Number(el.dataset.speed) || 0.15)
+    const isBackLayer = elements.map(el => el.dataset.layer === 'back')
+    const sectionTop =
+      containerRef.current.getBoundingClientRect().top + window.scrollY
 
     gsap.set(elements, {
       willChange: 'transform',
@@ -87,8 +91,10 @@ export default function ProductSection({
         if (scroll !== lastScroll) {
           for (let i = 0; i < elements.length; i++) {
             const speed = speeds[i]
-            ySetters[i](-scroll * speed)
-            rSetters[i](scroll * speed * 0.12)
+            const layerScroll = isBackLayer[i] ? scroll - sectionTop : scroll
+
+            ySetters[i](-layerScroll * speed)
+            rSetters[i](isBackLayer[i] ? 0 : scroll * speed * 0.12)
           }
 
           lastScroll = scroll
@@ -133,13 +139,14 @@ export default function ProductSection({
                 key={i}
                 ref={addParallaxRef}
                 data-speed={img.speed}
+                data-layer="back"
                 className={`parallax-layer absolute ${img.className}`}
               >
-                <img
+                <WebpImage
                   src={img.src}
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-auto max-w-[1920px] md:max-w-[1920px] lg:max-w-[1920px]"
+                  className="h-full w-full max-w-none object-cover"
                   alt=""
                 />
               </div>
@@ -191,9 +198,10 @@ export default function ProductSection({
                   key={i}
                   ref={addParallaxRef}
                   data-speed={img.speed}
+                  data-layer="front"
                   className={`parallax-layer absolute pointer-events-none z-30 ${img.className}`}
                 >
-                  <img
+                  <WebpImage
                     src={img.src}
                     loading="lazy"
                     decoding="async"

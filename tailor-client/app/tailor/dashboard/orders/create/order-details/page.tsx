@@ -8,6 +8,7 @@ import api from "@/lib/axios";
 import Link from "next/link";
 import { ChevronLeft, Trash2 } from "lucide-react";
 import { useRef } from "react";
+import WebpImage from "@/components/WebpImage";
 
 interface CustomMeasurement {
   name: string;
@@ -68,7 +69,7 @@ const DEFAULT_MEASUREMENT_CONFIG = {
   },
   fullLength: {
     label: "Full Length",
-    image: "/measurements/full_length.png",
+    image: "/measurements/full_length.webp",
     position: { top: "72%", left: "20%" },
   },
   topLength: {
@@ -650,7 +651,7 @@ const handleAudioRecorded = async (file: File) => {
             key={img}
             className="relative w-32 h-[200px] overflow-hidden rounded-lg"
           >
-            <img
+            <WebpImage
               src={img}
               alt="reference"
               className="w-full h-full object-cover"
@@ -783,7 +784,7 @@ const handleAudioRecorded = async (file: File) => {
                 key={key}
                 className="flex items-center gap-4 border border-gray-300 p-3 rounded-xl"
               >
-                <img
+                <WebpImage
                   src={config.image}
                   alt={config.label}
                   className={`h-24 w-24 shrink-0 bg-white object-contain ${
@@ -848,7 +849,7 @@ const handleAudioRecorded = async (file: File) => {
 
         {newMeasurement.image && (
           <div className="flex items-center gap-3 border p-3 rounded bg-gray-50 mt-3">
-            <img
+            <WebpImage
               src={URL.createObjectURL(newMeasurement.image)}
               className="w-24 h-24 rounded object-cover"
               alt="preview"
@@ -874,7 +875,7 @@ const handleAudioRecorded = async (file: File) => {
             {customMeasurements.map((m, i) => (
               <div key={i} className="flex items-center gap-3 p-2 rounded-xl">
                 
-                  <img
+                  <WebpImage
                     src={m.imageUrl as string}
                     className="w-24 h-24 rounded-xl object-cover"
                     alt={m.name}
@@ -900,7 +901,7 @@ const handleAudioRecorded = async (file: File) => {
         </h2>
 
         <div className="relative w-[380px] h-[580px] border rounded mx-auto">
-          <img
+          <WebpImage
             src="/measurements/measure.jpg"
             alt="Demo Body"
             className="w-full h-full object-cover"

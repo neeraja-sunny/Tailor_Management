@@ -16,6 +16,9 @@ export interface IUser extends Document {
   activeBoutique?: Types.ObjectId;
   boutique?: Types.ObjectId;
   createdBy?: Types.ObjectId;
+  staffSkills?: string[];
+  weeklyOrderLimit?: number;
+  monthlyOrderLimit?: number;
 
   password?: string;
   otp?: string;
@@ -67,6 +70,9 @@ const userSchema = new Schema<IUser>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    staffSkills: [{ type: String, trim: true }],
+    weeklyOrderLimit: { type: Number, default: 10, min: 1 },
+    monthlyOrderLimit: { type: Number, default: 40, min: 1 },
 
     password: {
       type: String,

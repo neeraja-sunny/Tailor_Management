@@ -1,6 +1,13 @@
 import User from "../models/User";
 import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
+import OrderItem from "../models/OrderItem";
+
+const cleanSkills = (value: unknown) => Array.from(new Set(
+  (Array.isArray(value) ? value : [])
+    .map((skill) => String(skill).trim().toLowerCase())
+    .filter(Boolean)
+));
 
 export const addStaff = async (req: Request, res: Response) => {
   try {
@@ -18,7 +25,7 @@ export const addStaff = async (req: Request, res: Response) => {
     }
 
     const email = req.body.email?.toLowerCase().trim();
-    const { name, phone } = req.body;
+    const { name, phone, staffSkills, weeklyOrderLimit, monthlyOrderLimit } = req.body;
 
     if (!email) return res.status(400).json({ message: "Email required" });
 
@@ -30,6 +37,10 @@ if (existing && existing.role === "staff" && !existing.isActive) {
   existing.phone = phone;
   existing.boutique = boutiqueId;
   existing.createdBy = ownerId;
+  existing.fullName = name?.trim() || existing.fullName;
+  existing.staffSkills = cleanSkills(staffSkills);
+  existing.weeklyOrderLimit = Math.max(Number(weeklyOrderLimit) || 10, 1);
+  existing.monthlyOrderLimit = Math.max(Number(monthlyOrderLimit) || 40, 1);
 
   await existing.save();
 
@@ -49,8 +60,11 @@ if (existing) {
 
     const staff = await User.create({
       email,
-      name,
+      fullName: name?.trim(),
       phone,
+      staffSkills: cleanSkills(staffSkills),
+      weeklyOrderLimit: Math.max(Number(weeklyOrderLimit) || 10, 1),
+      monthlyOrderLimit: Math.max(Number(monthlyOrderLimit) || 40, 1),
       role: "staff",
       createdBy: ownerId,
       boutique: boutiqueId,
@@ -90,9 +104,23 @@ export const getStaff = async (req: Request, res: Response) => {
       boutique: boutiqueId,
       createdBy: ownerId, 
       isActive: true
-    }).select("phone email");
+    }).select("phone email fullName staffSkills weeklyOrderLimit monthlyOrderLimit").lean();
 
-    res.json({ staff });
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const staffWithWorkload = await Promise.all(staff.map(async (member: any) => {
+      const [weeklyAssigned, monthlyAssigned] = await Promise.all([
+        OrderItem.countDocuments({ boutique: boutiqueId, workAssignments: { $elemMatch: { staff: member._id, assignedAt: { $gte: startOfWeek } } } }),
+        OrderItem.countDocuments({ boutique: boutiqueId, workAssignments: { $elemMatch: { staff: member._id, assignedAt: { $gte: startOfMonth } } } }),
+      ]);
+      return { ...member, weeklyAssigned, monthlyAssigned };
+    }));
+
+    res.json({ staff: staffWithWorkload });
   } catch {
     res.status(500).json({ message: "Failed to fetch staff" });
   }
@@ -129,5 +157,26 @@ export const deleteStaff = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("deleteStaff error:", error);
     res.status(500).json({ message: "Failed to delete staff" });
+  }
+};
+
+export const updateStaff = async (req: Request, res: Response) => {
+  try {
+    const ownerId = (req as any).user.userId;
+    const boutiqueId = (req as any).user.activeBoutique;
+    const { staffId } = req.params;
+    const staff = await User.findOne({ _id: staffId, role: "staff", createdBy: ownerId, boutique: boutiqueId, isActive: true });
+    if (!staff) return res.status(404).json({ message: "Staff not found" });
+
+    if (req.body.fullName !== undefined) staff.fullName = String(req.body.fullName).trim();
+    if (req.body.phone !== undefined) staff.phone = String(req.body.phone).trim();
+    if (req.body.staffSkills !== undefined) staff.staffSkills = cleanSkills(req.body.staffSkills);
+    if (req.body.weeklyOrderLimit !== undefined) staff.weeklyOrderLimit = Math.max(Number(req.body.weeklyOrderLimit) || 1, 1);
+    if (req.body.monthlyOrderLimit !== undefined) staff.monthlyOrderLimit = Math.max(Number(req.body.monthlyOrderLimit) || 1, 1);
+    await staff.save();
+    return res.json({ message: "Staff settings updated", staff });
+  } catch (error) {
+    console.error("updateStaff error:", error);
+    return res.status(500).json({ message: "Failed to update staff" });
   }
 };

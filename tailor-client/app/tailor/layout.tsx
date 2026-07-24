@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { AuthProvider } from "../context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MainFooter from "@/components/MainFooter";
 
 export const metadata = {
   title: 'Tailor Pro - Tailor Management',
@@ -13,10 +14,10 @@ export default function TailorLayout({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
       <Header />
-        <main className="min-h-screen">
-          {children}
-        </main>
-      <Footer />
+      <main className="min-h-screen">
+        {children}
+      </main>
+      <MainFooter />
     </AuthProvider>
   )
 }

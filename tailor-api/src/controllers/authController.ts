@@ -168,7 +168,10 @@ export const sendOtp = async (req: Request, res: Response) => {
     return res.json({ message: "OTP sent successfully", ...maybeDevOtp(otp) });
   } catch (error) {
     console.error("sendOtp error:", error);
-    return res.status(500).json({ message: "Error sending OTP" });
+    const detail = error instanceof Error ? error.message : "Unknown email provider error";
+    return res.status(500).json({
+      message: process.env.NODE_ENV === "production" ? "Error sending OTP" : `Error sending OTP: ${detail}`,
+    });
   }
 };
 

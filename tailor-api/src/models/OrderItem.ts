@@ -107,6 +107,11 @@ export interface IOrderItem extends Document {
     boutique?: mongoose.Schema.Types.ObjectId;
 
     assignedStaff?: mongoose.Types.ObjectId;
+    workAssignments?: {
+      workType: string;
+      staff: mongoose.Types.ObjectId;
+      assignedAt: Date;
+    }[];
    
 }
 
@@ -146,6 +151,11 @@ const orderitemSchema = new Schema<IOrderItem>(
 
   boutique: { type: mongoose.Schema.Types.ObjectId, ref: "Boutique", required: true },
   assignedStaff: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  workAssignments: [{
+    workType: { type: String, required: true, trim: true },
+    staff: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    assignedAt: { type: Date, default: Date.now },
+  }],
 },
   { timestamps: true }
 );

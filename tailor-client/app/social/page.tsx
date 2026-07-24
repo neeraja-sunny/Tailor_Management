@@ -1,4 +1,4 @@
-import Image from "next/image";
+import WebpNextImage from "@/components/WebpNextImage";
 import Link from "next/link";
 import ComingSoonPageOverlay from "@/components/ComingSoonPageOverlay";
 import {
@@ -20,19 +20,52 @@ import {
 } from "lucide-react";
 
 const trendCards = [
-  { title: "Minimal Elegance", saves: "12.4k saves", image: "/outfits/churidharimage.png" },
-  { title: "Bridal Inspo", saves: "18.7k saves", image: "/outfits/blouseimage.jpg" },
-  { title: "Pastel Perfect", saves: "7.8k saves", image: "/outfits/kurthaimage.jpg" },
-  { title: "Detail Work", saves: "6.1k saves", image: "/outfits/coatimage.jpg" },
+  { title: "Minimal Elegance", saves: "12.4k saves", image: "/fashion/saree-champagne.jpg" },
+  { title: "Bridal Inspo", saves: "18.7k saves", image: "/fashion/bride-red.jpg" },
+  { title: "Pastel Perfect", saves: "7.8k saves", image: "/fashion/lehenga-blue.jpg" },
+  { title: "Detail Work", saves: "6.1k saves", image: "/fashion/saree-blue-collage.jpg" },
 ];
 
 const feedItems = [
-  { shop: "Label Ananya", place: "Koramangala", image: "/outfits/churidharimage.png", tag: "Wedding" },
-  { shop: "The Silk Room", place: "Jayanagar", image: "/outfits/kurthaimage.jpg", tag: "Reels" },
-  { shop: "Stitch & Sage", place: "Whitefield", image: "/outfits/blouseimage.jpg", tag: "Saved" },
-  { shop: "Thread & Tales", place: "Indiranagar", image: "/outfits/pantimage.jpg", tag: "New" },
-  { shop: "Raaga Bridal Studio", place: "Bangalore", image: "/outfits/shirtimage.jpg", tag: "Style" },
-  { shop: "Ethnic Studio", place: "HSR Layout", image: "/outfits/coatimage.jpg", tag: "Bridal" },
+  { shop: "Label Ananya", place: "Koramangala", image: "/fashion/saree-champagne.jpg", tag: "Wedding" },
+  { shop: "The Silk Room", place: "Jayanagar", image: "/fashion/lehenga-blue.jpg", tag: "Reels" },
+  { shop: "Stitch & Sage", place: "Whitefield", image: "/fashion/bride-red.jpg", tag: "Saved" },
+  { shop: "Thread & Tales", place: "Indiranagar", image: "/fashion/saree-emerald.jpg", tag: "New" },
+  { shop: "Raaga Bridal Studio", place: "Bangalore", image: "/fashion/bride-gold.jpg", tag: "Style" },
+  { shop: "Ethnic Studio", place: "HSR Layout", image: "/fashion/saree-blue-collage.jpg", tag: "Bridal" },
+  { shop: "Golden Atelier", place: "Bangalore", image: "/fashion/gown-golden.jpg", tag: "Gowns" },
+  { shop: "Emerald House", place: "Indiranagar", image: "/fashion/gown-green.jpg", tag: "New" },
+  { shop: "Royal Maroon", place: "Koramangala", image: "/fashion/gown-maroon-princess.jpg", tag: "Trending" },
+  { shop: "Silver Studio", place: "Jayanagar", image: "/fashion/gown-silver.jpg", tag: "Detail Work" },
+  { shop: "Champagne Edit", place: "Whitefield", image: "/fashion/gown-champagne.jpg", tag: "Saved" },
+  { shop: "Blush Couture", place: "HSR Layout", image: "/fashion/gown-blush.jpg", tag: "Engagement" },
+  { shop: "Walima Edit", place: "Bangalore", image: "/fashion/gown-walima.jpg", tag: "Bridal" },
+  { shop: "Pinterest Lehenga", place: "Indiranagar", image: "/fashion/lehenga-pinterest.jpg", tag: "Popular" },
+  { shop: "Ivory Bride", place: "Koramangala", image: "/fashion/lehenga-walima.jpg", tag: "Wedding" },
+  { shop: "Earth Tones", place: "Jayanagar", image: "/fashion/lehenga-brown.jpg", tag: "New" },
+  { shop: "Red Bridal Edit", place: "Bangalore", image: "/fashion/lehenga-royal-red.jpg", tag: "Bridal" },
+  { shop: "Fuchsia Muse", place: "Whitefield", image: "/fashion/gown-fuchsia.jpg", tag: "Festive" },
+  { shop: "Floral Sarees", place: "Indiranagar", image: "/fashion/saree-floral.jpg", tag: "Pastel" },
+  { shop: "Handwork Studio", place: "Koramangala", image: "/fashion/saree-handwork.jpg", tag: "Craft" },
+  { shop: "Evening Elegance", place: "Jayanagar", image: "/fashion/saree-evening.jpg", tag: "Trending" },
+  { shop: "Pearl Handwork", place: "HSR Layout", image: "/fashion/saree-handwork-model.jpg", tag: "Sarees" },
+  { shop: "Shreekama Studio", place: "Bangalore", image: "/fashion/fishcut-lehenga.jpg", tag: "Custom" },
+  { shop: "Dusty Pink Atelier", place: "Indiranagar", image: "/fashion/gown-dusty-pink.jpg", tag: "Gowns" },
+  { shop: "White Tiara", place: "Koramangala", image: "/fashion/gown-white-tiara.jpg", tag: "Bridal" },
+  { shop: "Ivory Ball Gowns", place: "Jayanagar", image: "/fashion/gown-white-bridal.jpg", tag: "Wedding" },
+  { shop: "Bride Made", place: "Whitefield", image: "/fashion/gown-white-selfie.jpg", tag: "Inspired" },
+  { shop: "Maroon Velvet", place: "HSR Layout", image: "/fashion/lehenga-maroon-velvet.jpg", tag: "Royal" },
+  { shop: "Navy Heritage", place: "Bangalore", image: "/fashion/lehenga-navy.jpg", tag: "Lehengas" },
+  { shop: "Navy Floral Edit", place: "Indiranagar", image: "/fashion/lehenga-navy-floral.jpg", tag: "Trending" },
+  { shop: "Black & Blue", place: "Koramangala", image: "/fashion/lehenga-black-blue.jpg", tag: "Evening" },
+  { shop: "Quiet Luxury", place: "Jayanagar", image: "/fashion/lehenga-luxury-taupe.jpg", tag: "Saved" },
+  { shop: "Blush Bridal", place: "Whitefield", image: "/fashion/lehenga-blush-heavy.jpg", tag: "Pastel" },
+  { shop: "Unique Gold", place: "HSR Layout", image: "/fashion/lehenga-unique-gold.jpg", tag: "New" },
+  { shop: "Rose Gold Floral", place: "Bangalore", image: "/fashion/lehenga-rose-gold.jpg", tag: "Floral" },
+  { shop: "Bridal Muse", place: "Indiranagar", image: "/fashion/lehenga-bridal-model.jpg", tag: "Bridal" },
+  { shop: "Statement Bride", place: "Koramangala", image: "/fashion/gown-unique-bridal.jpg", tag: "Couture" },
+  { shop: "Royal Princess", place: "Jayanagar", image: "/fashion/lehenga-royal-princess.jpg", tag: "Popular" },
+  { shop: "Saffron Ivory", place: "HSR Layout", image: "/fashion/gown-saffron-ivory.jpg", tag: "Royal" },
 ];
 
 const navItems = [
@@ -51,7 +84,7 @@ export default function SocialLanding() {
       <div className="mx-auto flex max-w-[1500px]">
         <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-emerald-100/80 bg-white/72 px-6 py-8 shadow-2xl shadow-emerald-950/5 backdrop-blur-xl lg:block">
           <Link href="/tailor" className="mb-10 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-emerald-50 text-emerald-600">
+            <div className="flex h-11 w-11 items-center justify-center bg-emerald-50 text-emerald-600">
               <Sparkles size={23} />
             </div>
             <span className="text-3xl font-bold tracking-tight">Loomiz</span>
@@ -62,7 +95,7 @@ export default function SocialLanding() {
               return (
                 <button
                   key={item.label}
-                  className={`flex h-12 w-full items-center gap-3 rounded-md px-4 text-left text-sm font-semibold transition ${
+                  className={`flex h-12 w-full items-center gap-3 px-4 text-left text-sm font-semibold transition ${
                     index === 0 ? "bg-slate-950 text-white shadow-lg shadow-emerald-950/15" : "text-slate-700 hover:bg-emerald-50"
                   }`}
                 >
@@ -72,10 +105,10 @@ export default function SocialLanding() {
               );
             })}
           </nav>
-          <div className="mt-10 rounded-lg border border-emerald-100 bg-white/80 p-5 shadow-xl shadow-emerald-950/5">
+          <div className="mt-10 border border-emerald-100 bg-white/80 p-5 shadow-xl shadow-emerald-950/5">
             <p className="text-lg font-bold">Get Inspired. Get Noticed.</p>
             <p className="mt-2 text-sm leading-6 text-slate-600">A simple preview for fashion posts, reels, saves, and boutique discovery.</p>
-            <Link href="/tailor" className="mt-5 inline-flex items-center rounded-md bg-slate-950 px-5 py-3 text-sm font-bold text-white">
+            <Link href="/tailor" className="mt-5 inline-flex items-center bg-slate-950 px-5 py-3 text-sm font-bold text-white">
               Management
             </Link>
           </div>
@@ -87,18 +120,18 @@ export default function SocialLanding() {
               <Sparkles className="text-emerald-600" />
               <span className="text-2xl font-bold">Loomiz</span>
             </div>
-            <div className="flex min-h-14 flex-1 items-center gap-3 rounded-md bg-white/90 px-5 shadow-xl shadow-emerald-950/5 ring-1 ring-emerald-100 backdrop-blur md:max-w-2xl">
+            <div className="flex min-h-14 flex-1 items-center gap-3 bg-white/90 px-5 shadow-xl shadow-emerald-950/5 ring-1 ring-emerald-100 backdrop-blur md:max-w-2xl">
               <Search size={21} className="text-slate-500" />
               <span className="truncate text-sm text-slate-500">Search styles, boutiques, inspirations...</span>
             </div>
             <div className="flex items-center gap-4">
               <span className="hidden items-center gap-2 text-sm font-semibold md:flex"><MapPin size={20} /> Bangalore, India</span>
-              <button className="rounded-md bg-white/90 p-3 shadow-xl shadow-emerald-950/5 ring-1 ring-emerald-100" aria-label="Saved"><Heart size={21} /></button>
-              <button className="rounded-md bg-white/90 p-3 shadow-xl shadow-emerald-950/5 ring-1 ring-emerald-100" aria-label="Notifications"><Bell size={21} /></button>
+              <button className="bg-white/90 p-3 shadow-xl shadow-emerald-950/5 ring-1 ring-emerald-100" aria-label="Saved"><Heart size={21} /></button>
+              <button className="bg-white/90 p-3 shadow-xl shadow-emerald-950/5 ring-1 ring-emerald-100" aria-label="Notifications"><Bell size={21} /></button>
             </div>
           </header>
 
-          <section className="rounded-xl border border-emerald-100 bg-white/90 p-5 shadow-2xl shadow-emerald-950/8 backdrop-blur">
+          <section className="bg-transparent py-5">
             <div className="mb-4 flex items-end justify-between">
               <div>
                 <h1 className="flex items-center gap-2 text-2xl font-bold"><Flame className="text-emerald-600" /> Trending Now</h1>
@@ -106,12 +139,12 @@ export default function SocialLanding() {
               </div>
               <button className="text-sm font-bold text-emerald-600">See all</button>
             </div>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {trendCards.map((item) => (
-                <article key={item.title} className="relative min-h-72 overflow-hidden rounded-lg bg-slate-100 shadow-xl shadow-emerald-950/10 ring-1 ring-white/70">
-                  <Image src={item.image} alt="" fill className="object-cover" sizes="(max-width: 768px) 50vw, 20vw" />
+                <article key={item.title} className="relative min-h-[23rem] overflow-hidden bg-slate-100 shadow-xl shadow-emerald-950/10 ring-1 ring-white/70">
+                  <WebpNextImage src={item.image} alt="" fill className="object-cover" sizes="(max-width: 768px) 50vw, 20vw" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/20 to-transparent" />
-                  <button className="absolute left-4 top-4 rounded-md bg-white/95 p-2 text-emerald-600 shadow-lg shadow-black/15" aria-label="Play"><Play size={17} fill="currentColor" /></button>
+                  <button className="absolute left-4 top-4 bg-white/95 p-2 text-emerald-600 shadow-lg shadow-black/15" aria-label="Play"><Play size={17} fill="currentColor" /></button>
                   <div className="absolute bottom-4 left-4 right-4 text-white">
                     <h2 className="text-lg font-bold leading-tight">{item.title}</h2>
                     <p className="mt-1 text-sm">{item.saves}</p>
@@ -121,28 +154,32 @@ export default function SocialLanding() {
             </div>
           </section>
 
-          <section className="mt-6 rounded-xl border border-emerald-100 bg-white/90 p-5 shadow-2xl shadow-emerald-950/8 backdrop-blur">
+          <section className="mt-6 bg-transparent pt-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap gap-2">
                 {["For You", "Popular Near You", "Following", "New Arrivals"].map((tab, index) => (
-                  <button key={tab} className={`rounded-md px-4 py-2 text-sm font-semibold shadow-sm ${index === 0 ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-600 ring-1 ring-slate-100"}`}>
+                  <button key={tab} className={`px-4 py-2 text-sm font-semibold shadow-sm ${index === 0 ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-600 ring-1 ring-slate-100"}`}>
                     {tab}
                   </button>
                 ))}
               </div>
-              <button className="rounded-md border border-emerald-200 p-3 text-slate-700" aria-label="Filters"><SlidersHorizontal size={20} /></button>
+              <button className="border border-emerald-200 p-3 text-slate-700" aria-label="Filters"><SlidersHorizontal size={20} /></button>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {feedItems.map((item) => (
-                <article key={item.shop} className="relative min-h-[23rem] overflow-hidden rounded-lg bg-slate-100 shadow-2xl shadow-emerald-950/10 ring-1 ring-white/70">
-                  <Image src={item.image} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 30vw" />
+            <div className="columns-1 gap-3 sm:columns-2 xl:columns-3">
+              {feedItems.map((item, index) => (
+                <article
+                  key={item.shop}
+                  className="relative mb-3 break-inside-avoid overflow-hidden bg-transparent"
+                  style={{ height: [560, 420, 510, 620, 450, 540][index % 6] }}
+                >
+                  <WebpNextImage src={item.image} alt="" fill className="object-cover object-top" sizes="(max-width: 768px) 100vw, 45vw" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/15 to-transparent" />
-                  <div className="absolute left-4 top-4 rounded-md bg-white/90 px-3 py-1 text-xs font-bold text-emerald-700">{item.tag}</div>
+                  <div className="absolute left-4 top-4 bg-white/90 px-3 py-1 text-xs font-bold text-emerald-700">{item.tag}</div>
                   <Bookmark className="absolute right-4 top-4 text-white" />
                   <div className="absolute bottom-4 left-4 right-4 text-white">
                     <h2 className="text-lg font-bold">{item.shop}</h2>
                     <p className="text-sm">{item.place}, Bangalore</p>
-                    <button className="mt-3 rounded-md border border-white/70 px-4 py-2 text-sm font-bold">Get This Stitched</button>
+                    <button className="mt-3 border border-white/70 px-4 py-2 text-sm font-bold">Get This Stitched</button>
                   </div>
                 </article>
               ))}
@@ -151,9 +188,9 @@ export default function SocialLanding() {
         </section>
       </div>
 
-      <nav className="fixed bottom-4 left-1/2 z-20 flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 items-center justify-around rounded-lg bg-white/92 px-5 py-3 shadow-2xl ring-1 ring-emerald-100 backdrop-blur lg:hidden">
+      <nav className="fixed bottom-4 left-1/2 z-20 flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 items-center justify-around bg-white/92 px-5 py-3 shadow-2xl ring-1 ring-emerald-100 backdrop-blur lg:hidden">
         {[Home, Search, Plus, Compass, User].map((Icon, index) => (
-          <button key={index} className={`${index === 2 ? "bg-emerald-600 text-white" : "text-slate-700"} rounded-md p-3`} aria-label={`Social action ${index + 1}`}>
+          <button key={index} className={`${index === 2 ? "bg-emerald-600 text-white" : "text-slate-700"} p-3`} aria-label={`Social action ${index + 1}`}>
             <Icon size={22} />
           </button>
         ))}
@@ -163,5 +200,3 @@ export default function SocialLanding() {
     </main>
   );
 }
-
-
